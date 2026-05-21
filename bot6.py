@@ -142,26 +142,30 @@ while True:
                 pyautogui.click(211, 542)
                 time.sleep(0.30)
 
-                #Barbarian King Select
+                            # (1) Barbarian King
                 pyautogui.click(848, 1097)
                 time.sleep(0.82)
-                #Barbarian King Drop
                 pyautogui.click(206, 544)
                 time.sleep(1.32)
 
-                #Archer Queen Select
+                # (4) Royal Champion
+                pyautogui.click(1239, 1095)
+                time.sleep(0.85)
+                pyautogui.click(205, 552)
+                time.sleep(0.98)
+
+                # (3) Grand Warden
+                pyautogui.click(1099, 1063)
+                time.sleep(0.84)
+                pyautogui.click(442, 730)
+                time.sleep(1.14)
+
+                # (2) Archer Queen
                 pyautogui.click(951, 1076)
                 time.sleep(0.84)
-                #Archer Queen Drop
                 pyautogui.click(459, 341)
                 time.sleep(0.99)
 
-                #Grand Warden Select
-                pyautogui.click(1099, 1063)
-                time.sleep(0.84)
-                #Grand Warden Drop
-                pyautogui.click(442, 730)
-                time.sleep(1.14)
 
                 #Royal Champion Select
                 pyautogui.click(1239, 1095)
