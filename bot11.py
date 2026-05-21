@@ -78,7 +78,10 @@ while True:
                 #Electro Dragon Select   
                 pyautogui.click(263, 1119)
                 time.sleep(4.14)
-                #1Electro Dragon Drop
+                #11Electro Dragon Drop
+                pyautogui.click(674, 203)
+                time.sleep(0.20)
+                 #1Electro Dragon Drop
                 pyautogui.click(639, 902)
                 time.sleep(0.30)
                 #2Electro Dragon Drop
@@ -107,9 +110,6 @@ while True:
                 time.sleep(0.20)
                 #10Electro Dragon Drop
                 pyautogui.click(585, 261)
-                time.sleep(0.20)
-                #11Electro Dragon Drop
-                pyautogui.click(674, 203)
                 time.sleep(0.20)
 
                 #Balloons
