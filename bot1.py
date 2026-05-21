@@ -167,8 +167,6 @@ while True:
                 pyautogui.click(205, 552)
                 time.sleep(0.98)
 
-
-
                 #Rage Spell Select
                 pyautogui.click(1371, 1121)
                 time.sleep(0.82)
