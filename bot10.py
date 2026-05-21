@@ -21,8 +21,16 @@ print("පින්තූර පිළිවෙලට පරීක්ෂා ක�
 
 current_step = 0  # ආරම්භක පියවර 
 
-# එක් වරක් පමණක් attack sequence එක execute කිරීම
-while current_step < len(image_sequence):
+while True:
+    # සියලුම පියවර අවසන් වූ පසු නැවත පළමු පියවරට (Loop) මාරු වේ
+    if current_step >= len(image_sequence):
+        print("\n==========================================")
+        print("[SUCCESS] සියලුම Attack පියවරවල් සාර්ථකව අවසන්!")
+        print("නැවත මුල සිට (පළමු පියවරේ සිට) ආරම්භ වේ...")
+        print("==========================================\n")
+        current_step = 0
+        time.sleep(3)
+
     target_image = image_sequence[current_step]
     print(f"සොයමින් පවතී: {target_image} (පියවර {current_step + 1}/{len(image_sequence)})", end="\r")
 
@@ -63,187 +71,153 @@ while current_step < len(image_sequence):
                 
                 # ⚔️ 4. ඔබ ලබාදුන් සැබෑ Attack (Troop Deploy) Macro එක ආරම්භ කිරීම
                 print("\n🚀 [MACRO] භටයින් සිතියමට මුදා හැරීම (Troop Deployment) ආරම්භ කළා...")
-
-                # Electro Dragon Select
-                pyautogui.click(272, 1094)
-                time.sleep(4.6)
                 
                 
                 
-                
-                
-                
+                #Electro Dragons
+                #Electro Dragon Select   
+                pyautogui.click(263, 1119)
+                time.sleep(4.14)
+                #1Electro Dragon Drop
+                pyautogui.click(639, 902)
+                time.sleep(0.30)
+                #2Electro Dragon Drop
+                pyautogui.click(552, 841)
+                time.sleep(0.25)
+                #3Electro Dragon Drop
+                pyautogui.click(478, 760)
+                time.sleep(0.25)
+                #4Electro Dragon Drop
+                pyautogui.click(397, 706)
+                time.sleep(0.25)
+                #5Electro Dragon Drop
+                pyautogui.click(321, 639)
+                time.sleep(0.20)
+                #6Electro Dragon Drop
+                pyautogui.click(220, 567)
+                time.sleep(0.20)
+                #7Electro Dragon Drop
+                pyautogui.click(310, 472)
+                time.sleep(0.25)
+                #8Electro Dragon Drop
+                pyautogui.click(418, 387)
+                time.sleep(0.30)
+                #9Electro Dragon Drop
+                pyautogui.click(508, 315)
+                time.sleep(0.20)
+                #10Electro Dragon Drop
+                pyautogui.click(585, 261)
+                time.sleep(0.20)
+                #11Electro Dragon Drop
+                pyautogui.click(674, 203)
+                time.sleep(0.20)
 
-                # Pattern 2: first half reversed, then second half same
-                #5 electro dragon Drop
-                pyautogui.click(163, 601)
-                time.sleep(1.14)
-
-                #4 electro dragon Drop
-                pyautogui.click(288, 725)
-                time.sleep(0.55)
-
-                #3 electro dragon Drop
-                pyautogui.click(401, 802)
-                time.sleep(0.56)
-
-                #2 electro dragon Drop
-                pyautogui.click(500, 870)
-                time.sleep(0.55)
-
-                #1 electro dragon Drop
-                pyautogui.click(589, 916)
-                time.sleep(2.34)
-
-                #6 electro dragon Drop
-                pyautogui.click(191, 494)
-                time.sleep(0.74)
-
-                #7 electro dragon Drop
-                pyautogui.click(326, 399)
-                time.sleep(0.6)
-
-                #8 electro dragon Drop
-                pyautogui.click(405, 316)
-                time.sleep(0.51)
-
-                #9 electro dragon Drop
-                pyautogui.click(487, 248)
-                time.sleep(0.45)
- 
-                #10 electro dragon Drop
-                pyautogui.click(590, 177)
-                time.sleep(0.49)
-
-                #11 electro dragon Drop
-                pyautogui.click(712, 113)
-                time.sleep(1.19)
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                #Range Spell Select
-                pyautogui.click(1383, 1100)
-                time.sleep(1.94)
-
-                #1 Range Spell Drop
-                pyautogui.click(832, 763)
-                time.sleep(1.36)
-
-                #2 Range Spell Drop
-                pyautogui.click(676, 645)
-                time.sleep(0.43)
-
-                #3 Range Spell Drop
-                pyautogui.click(639, 533)
-                time.sleep(0.47)
-
-                #4 Range Spell Drop
-                pyautogui.click(749, 461)
-                time.sleep(0.38)
-
-                #5 Range Spell Drop
-                pyautogui.click(857, 393)
-                time.sleep(0.53)
-
+                #Balloons
                 #Balloon Select
-                pyautogui.click(418, 1073)
-                time.sleep(1.9)
+                pyautogui.click(354, 1113)
+                time.sleep(1.34)
+                #1Balloon Drop
+                pyautogui.click(259, 609)
+                time.sleep(0.30)
+                #2Balloon Drop
+                pyautogui.click(359, 671)
+                time.sleep(0.25)
+                #3Balloon Drop
+                pyautogui.click(420, 723)
+                time.sleep(0.25)
 
-                #1 Balloon Drop
-                pyautogui.click(192, 552)
-                time.sleep(0.93)
-
-                #2 Balloon Drop
-                pyautogui.click(192, 552)
-                time.sleep(0.27)
-
-                #3 Balloon Drop
-                pyautogui.click(188, 552)
-                time.sleep(0.33)
-
+                #Archers
                 #Archer Select
-                pyautogui.click(516, 1098)
-                time.sleep(0.97)
+                pyautogui.click(549, 1097)
+                time.sleep(0.55)
+                #1Archer Drop
+                pyautogui.click(214, 549)
+                time.sleep(0.30)
 
-                #1 Archer Drop
-                pyautogui.click(192, 552)
-                time.sleep(0.5)
+                #Vehicles
+                #Stone Slammer Select
+                pyautogui.click(681, 1087)
+                time.sleep(0.63)
+                #1Stone Slammer Drop
+                pyautogui.click(211, 542)
+                time.sleep(0.30)
 
                 #Barbarian King Select
-                pyautogui.click(151, 558)
-                time.sleep(0.69)
-
+                pyautogui.click(848, 1097)
+                time.sleep(0.82)
                 #Barbarian King Drop
-                pyautogui.click(837, 1093)
-                time.sleep(1.15)
+                pyautogui.click(206, 544)
+                time.sleep(1.32)
 
                 #Archer Queen Select
-                pyautogui.click(167, 556)
-                time.sleep(1.18)
-
+                pyautogui.click(951, 1076)
+                time.sleep(0.84)
                 #Archer Queen Drop
-                pyautogui.click(973, 1080)
-                time.sleep(1.07)
+                pyautogui.click(459, 341)
+                time.sleep(0.99)
 
                 #Grand Warden Select
-                pyautogui.click(163, 565)
-                time.sleep(0.85)
-
+                pyautogui.click(1099, 1063)
+                time.sleep(0.84)
                 #Grand Warden Drop
-                pyautogui.click(1108, 1062)
-                time.sleep(0.74)
+                pyautogui.click(442, 730)
+                time.sleep(1.14)
 
                 #Royal Champion Select
-                pyautogui.click(179, 569)
-                time.sleep(0.76)
-
+                pyautogui.click(1239, 1095)
+                time.sleep(0.85)
                 #Royal Champion Drop
-                pyautogui.click(1249, 1075)
-                time.sleep(0.9)
-
-                #Freeze Spell Select
-                pyautogui.click(172, 573)
+                pyautogui.click(205, 552)
                 time.sleep(0.98)
 
-                #1 Freeze Spell Drop
-                pyautogui.click(1531, 1082)
-                time.sleep(0.8)
+                #Rage Spell Select
+                pyautogui.click(1371, 1121)
+                time.sleep(0.82)
+                #1Rage Spell Drop
+                pyautogui.click(880, 689)
+                time.sleep(1.18)
+                #2Rage Spell Drop
+                pyautogui.click(776, 594)
+                time.sleep(0.25)
+                #3Rage Spell Drop
+                pyautogui.click(772, 492)
+                time.sleep(0.25)
+                #4Rage Spell Drop
+                pyautogui.click(906, 448)
+                time.sleep(0.25)
+                #5Rage Spell Drop
+                pyautogui.click(899, 545)
+                time.sleep(0.30)
 
-                #Stone Slammer Select
-                pyautogui.click(902, 563)
-                time.sleep(1.02)
-
-                #Stone Slammer Drop
-                pyautogui.click(713, 1067)
-                time.sleep(1.07)
+                #Freeze Spell Select
+                pyautogui.click(1538, 1111)
+                time.sleep(1.11)
+                #1Freeze Spell Drop
+                pyautogui.click(980, 555)
+                time.sleep(1.53)
 
                 #Barbarian King Ability
-                pyautogui.click(177, 557)
-                time.sleep(1.24)
-
+                pyautogui.click(835, 1105)
+                time.sleep(1.26)
                 #Archer Queen Ability
-                pyautogui.click(845, 1073)
-                time.sleep(0.82)
-
+                pyautogui.click(953, 1093)
+                time.sleep(0.83)
                 #Grand Warden Ability
-                pyautogui.click(951, 1080)
-                time.sleep(0.34)
-
+                pyautogui.click(1111, 1098)
+                time.sleep(0.50)
                 #Royal Champion Ability
-                pyautogui.click(1098, 1088)
-                time.sleep(0.4)
-
-                pyautogui.click(1204, 1095)
-                time.sleep(0.36)
+                pyautogui.click(1208, 1101)
+                time.sleep(0.55)
                 
-                print("\n[SUCCESS] Attack Macro එක අවසන් වුණා. දැන් Return Home Button එක එනතුරු බලන් සිටී...\n")
+                
+                
+                
+                
+                
+                
+                
+                
+                print("[SUCCESS] Attack Macro එක අවසන් වුණා. දැන් Return Home Button එක එනතුරු බලන් සිටී...\n")
             
             # සාර්ථකව ක්ලික් වූ (සහ Macro එක අවසන් වූ) පසු ඊළඟ පියවරට (Next Step) යයි
             current_step += 1
@@ -255,8 +229,3 @@ while current_step < len(image_sequence):
         print(f"\n[ERROR] බලාපොරොත්තු නොවූ දෝෂයක්: {e}")
         
     time.sleep(0.5)
-
-print("\n==========================================")
-print("[SUCCESS] Attack සාර්ථකව අවසන්!")
-print("Bot එක වැඩ කටයුතු අවසන් කළා.")
-print("==========================================")

@@ -3,7 +3,7 @@ import sys
 import time
 from pathlib import Path
 
-bot_files = [f"bot{i}.py" for i in range(1, 11)]
+bot_files = [f"bot{i}.py" for i in range(1, 12)]
 workspace_dir = Path(__file__).resolve().parent
 
 

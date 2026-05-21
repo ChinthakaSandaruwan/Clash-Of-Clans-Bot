@@ -76,11 +76,6 @@ while True:
                 pyautogui.click(272, 1094)
                 time.sleep(4.6)
 
-
-
-
-
-
                 #1 electro dragon Drop
                 pyautogui.click(589, 916)
                 time.sleep(2.34)
@@ -154,6 +149,12 @@ while True:
                 #5 Range Spell Drop
                 pyautogui.click(857, 393)
                 time.sleep(0.53)
+                
+
+
+
+
+
 
                 #Balloon Select
                 pyautogui.click(418, 1073)
@@ -170,6 +171,10 @@ while True:
                 #3 Balloon Drop
                 pyautogui.click(188, 552)
                 time.sleep(0.33)
+                
+
+
+
 
                 #Archer Select
                 pyautogui.click(516, 1098)
@@ -178,6 +183,10 @@ while True:
                 #1 Archer Drop
                 pyautogui.click(192, 552)
                 time.sleep(0.5)
+                
+                
+                
+                
 
                 #Barbarian King Select
                 pyautogui.click(151, 558)
@@ -187,6 +196,9 @@ while True:
                 pyautogui.click(837, 1093)
                 time.sleep(1.15)
 
+
+
+
                 #Archer Queen Select
                 pyautogui.click(167, 556)
                 time.sleep(1.18)
@@ -194,6 +206,9 @@ while True:
                 #Archer Queen Drop
                 pyautogui.click(973, 1080)
                 time.sleep(1.07)
+                
+                
+                
 
                 #Grand Warden Select
                 pyautogui.click(163, 565)
@@ -202,6 +217,11 @@ while True:
                 #Grand Warden Drop
                 pyautogui.click(1108, 1062)
                 time.sleep(0.74)
+                
+                
+                
+                
+                
 
                 #Royal Champion Select
                 pyautogui.click(179, 569)
@@ -210,6 +230,12 @@ while True:
                 #Royal Champion Drop
                 pyautogui.click(1249, 1075)
                 time.sleep(0.9)
+                
+                
+                
+                
+                
+                
 
                 #Freeze Spell Select
                 pyautogui.click(172, 573)
@@ -218,6 +244,13 @@ while True:
                 #1 Freeze Spell Drop
                 pyautogui.click(1531, 1082)
                 time.sleep(0.8)
+                
+                
+                
+                
+                
+                
+                
 
                 #Stone Slammer Select
                 pyautogui.click(902, 563)
@@ -226,6 +259,13 @@ while True:
                 #Stone Slammer Drop
                 pyautogui.click(713, 1067)
                 time.sleep(1.07)
+                
+                
+                
+                
+                
+                
+                
 
                 #Barbarian King Ability
                 pyautogui.click(177, 557)
@@ -243,8 +283,8 @@ while True:
                 pyautogui.click(1098, 1088)
                 time.sleep(0.4)
 
-                pyautogui.click(1204, 1095)
-                time.sleep(0.36)
+                # pyautogui.click(1204, 1095)
+                # time.sleep(0.36)
                 
                 print("[SUCCESS] Attack Macro එක අවසන් වුණා. දැන් Return Home Button එක එනතුරු බලන් සිටී...\n")
             
