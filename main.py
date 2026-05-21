@@ -65,7 +65,7 @@ WAIT_TIME = 10
 class BotRunnerGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Multi-Bot Automation Clash Of Clans Controller")
+        self.root.title("Multi-Bot Automation Clash Of Clans Controller For Max Army Camp")
         self.root.geometry("650x500")
         self.root.minsize(500, 400)
         
