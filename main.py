@@ -48,49 +48,144 @@
 # bot11.py start -> bot11.py running -> bot11.py end
 # wait 10 seconds
 
-
+import tkinter as tk
+from tkinter import ttk, scrolledtext
 import subprocess
 import time
 import os
+import threading
 
-# List of all your bot scripts (ordered from bot1 to bot11)
+# List of all your bot scripts
 BOT_SCRIPTS = [
     "bot1.py", "bot2.py", "bot3.py", "bot4.py", "bot5.py",
     "bot6.py", "bot7.py", "bot8.py", "bot9.py", "bot10.py", "bot11.py"
 ]
+WAIT_TIME = 10
 
-WAIT_TIME = 10  # Seconds to wait between bots
+class BotRunnerGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Multi-Bot Automation Controller")
+        self.root.geometry("650x500")
+        self.root.minsize(500, 400)
+        
+        # State variables
+        self.is_running = False
+        self.automation_thread = None
+        
+        self.setup_ui()
+        
+    def setup_ui(self):
+        # --- Top Control Panel ---
+        control_frame = ttk.Frame(self.root, padding="10")
+        control_frame.pack(fill=tk.X)
+        
+        self.start_btn = ttk.Button(control_frame, text="▶ Start Automation", command=self.start_automation)
+        self.start_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.stop_btn = ttk.Button(control_frame, text="⏹ Stop Loop", command=self.stop_automation, state=tk.DISABLED)
+        self.stop_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.status_label = ttk.Label(control_frame, text="Status: Idle", font=("Helvetica", 10, "bold"))
+        self.status_label.pack(side=tk.RIGHT, padx=10)
+        
+        # --- Current Progress Panel ---
+        progress_frame = ttk.LabelFrame(self.root, text=" Current Activity ", padding="10")
+        progress_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        self.current_bot_label = ttk.Label(progress_frame, text="Active Bot: None", font=("Helvetica", 10))
+        self.current_bot_label.pack(anchor=tk.W)
+        
+        self.loop_label = ttk.Label(progress_frame, text="Loop Count: 0", font=("Helvetica", 9))
+        self.loop_label.pack(anchor=tk.W, pady=(5, 0))
+        
+        # --- Log Output Panel ---
+        log_frame = ttk.LabelFrame(self.root, text=" Live Console Logs ", padding="10")
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        self.log_area = scrolledtext.ScrolledText(log_frame, wrap=tk.WORD, font=("Consolas", 9), bg="#1e1e1e", fg="#ffffff")
+        self.log_area.pack(fill=tk.BOTH, expand=True)
+        self.log_area.insert(tk.END, "System ready. Click 'Start Automation' to begin the sequence.\n")
+        self.log_area.configure(state=tk.DISABLED)
 
-def run_bots_loop():
-    loop_count = 1
-    
-    try:
-        while True:
-            print(f"\n========== STARTING LOOP ITERATION #{loop_count} ==========")
+    def log(self, message):
+        """Thread-safe logging helper to write directly to the GUI window"""
+        self.log_area.configure(state=tk.NORMAL)
+        self.log_area.insert(tk.END, message + "\n")
+        self.log_area.see(tk.END)  # Auto-scroll to bottom
+        self.log_area.configure(state=tk.DISABLED)
+
+    def update_status(self, text, bot_text=None, loop_text=None):
+        """Thread-safe UI text updates"""
+        self.status_label.config(text=f"Status: {text}")
+        if bot_text:
+            self.current_bot_label.config(text=f"Active Bot: {bot_text}")
+        if loop_text:
+            self.loop_label.config(text=f"Loop Count: {loop_text}")
+
+    def start_automation(self):
+        if not self.is_running:
+            self.is_running = True
+            self.start_btn.config(state=tk.DISABLED)
+            self.stop_btn.config(state=tk.NORMAL)
+            
+            # Run the automation loop in a separate thread so the GUI doesn't freeze
+            self.automation_thread = threading.Thread(target=self.run_loop_sequence, daemon=True)
+            self.automation_thread.start()
+
+    def stop_automation(self):
+        if self.is_running:
+            self.is_running = False
+            self.log("\n[!] Stop requested. Finishing current step and safely shutting down...")
+            self.update_status("Stopping...")
+            self.stop_btn.config(state=tk.DISABLED)
+
+    def run_loop_sequence(self):
+        loop_count = 1
+        
+        while self.is_running:
+            self.log(f"\n=========================================\n  STARTING LOOP ITERATION #{loop_count}\n=========================================")
+            self.update_status("Running Sequence", loop_text=str(loop_count))
             
             for bot in BOT_SCRIPTS:
-                # Quick safety check to see if the file actually exists
+                if not self.is_running:
+                    break
+                    
                 if not os.path.exists(bot):
-                    print(f"[Warning] {bot} not found in this folder. Skipping to next...")
+                    self.log(f"[Warning] File '{bot}' not found. Skipping...")
                     continue
                 
-                print(f"\n[➔] {bot} start")
-                print(f"[⚙] {bot} running...")
+                # Update status bars
+                self.update_status("Bot Active", bot_text=bot)
+                self.log(f"\n[➔] {bot} start")
+                self.log(f"[⚙] {bot} running...")
                 
-                # subprocess.run waits until the script finishes executing
+                # Execute bot and wait for it to finish
+                # stdout/stderr tracking makes sure bot internal prints flow through to main console terminal
                 result = subprocess.run(["python", bot])
                 
-                print(f"[✓] {bot} end (Exit Code: {result.returncode})")
+                self.log(f"[✓] {bot} ended (Exit Code: {result.returncode})")
                 
-                # Wait 10 seconds before starting the next bot
-                print(f"[⏳] Waiting {WAIT_TIME} seconds...")
-                time.sleep(WAIT_TIME)
+                if not self.is_running:
+                    break
+                    
+                # 10-second wait system that checks every second if the user hit stop
+                self.update_status("Cooldown / Waiting", bot_text=f"Waiting after {bot}")
+                for i in range(WAIT_TIME, 0, -1):
+                    if not self.is_running:
+                        break
+                    self.log(f"[⏳] Next bot in {i} seconds...")
+                    time.sleep(1)
             
-            print(f"\n========== FINISHED LOOP ITERATION #{loop_count} ==========")
             loop_count += 1
             
-    except KeyboardInterrupt:
-        print("\n[!] Automation stopped manually by user (Ctrl+C). Exiting cleanly.")
+        # Reset UI on clean exit
+        self.log("\n[✓] Automation loop stopped entirely.")
+        self.update_status("Idle", bot_text="None")
+        self.start_btn.config(state=tk.NORMAL)
+        self.stop_btn.config(state=tk.DISABLED)
 
 if __name__ == "__main__":
-    run_bots_loop()
+    root = tk.Tk()
+    app = BotRunnerGUI(root)
+    root.mainloop()
