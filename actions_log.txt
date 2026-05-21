@@ -1,0 +1,122 @@
+
+--- New Session (2026-05-21 12:28:28) ---
+pyautogui.click(263, 1119)
+time.sleep(4.14)
+
+pyautogui.click(639, 902)
+time.sleep(5.71)
+
+pyautogui.click(552, 841)
+time.sleep(0.67)
+
+pyautogui.click(478, 760)
+time.sleep(0.59)
+
+pyautogui.click(397, 706)
+time.sleep(0.64)
+
+pyautogui.click(321, 639)
+time.sleep(0.5)
+
+pyautogui.click(220, 567)
+time.sleep(0.51)
+
+pyautogui.click(310, 472)
+time.sleep(0.73)
+
+pyautogui.click(418, 387)
+time.sleep(0.9)
+
+pyautogui.click(508, 315)
+time.sleep(0.54)
+
+pyautogui.click(585, 261)
+time.sleep(0.5)
+
+pyautogui.click(674, 203)
+time.sleep(0.49)
+
+pyautogui.click(354, 1113)
+time.sleep(1.34)
+
+pyautogui.click(259, 609)
+time.sleep(0.91)
+
+pyautogui.click(359, 671)
+time.sleep(0.61)
+
+pyautogui.click(420, 723)
+time.sleep(0.52)
+
+pyautogui.click(549, 1097)
+time.sleep(0.55)
+
+pyautogui.click(214, 549)
+time.sleep(0.76)
+
+pyautogui.click(681, 1087)
+time.sleep(0.63)
+
+pyautogui.click(211, 542)
+time.sleep(0.86)
+
+pyautogui.click(848, 1097)
+time.sleep(0.82)
+
+pyautogui.click(206, 544)
+time.sleep(1.32)
+
+pyautogui.click(951, 1076)
+time.sleep(0.84)
+
+pyautogui.click(459, 341)
+time.sleep(0.99)
+
+pyautogui.click(1099, 1063)
+time.sleep(0.84)
+
+pyautogui.click(442, 730)
+time.sleep(1.14)
+
+pyautogui.click(1239, 1095)
+time.sleep(0.85)
+
+pyautogui.click(205, 552)
+time.sleep(0.98)
+
+pyautogui.click(1371, 1121)
+time.sleep(0.82)
+
+pyautogui.click(880, 689)
+time.sleep(1.18)
+
+pyautogui.click(776, 594)
+time.sleep(0.48)
+
+pyautogui.click(772, 492)
+time.sleep(0.51)
+
+pyautogui.click(906, 448)
+time.sleep(0.53)
+
+pyautogui.click(899, 545)
+time.sleep(2.47)
+
+pyautogui.click(1538, 1111)
+time.sleep(1.11)
+
+pyautogui.click(980, 555)
+time.sleep(1.53)
+
+pyautogui.click(835, 1105)
+time.sleep(1.26)
+
+pyautogui.click(953, 1093)
+time.sleep(0.83)
+
+pyautogui.click(1111, 1098)
+time.sleep(0.5)
+
+pyautogui.click(1208, 1101)
+time.sleep(0.55)
+
