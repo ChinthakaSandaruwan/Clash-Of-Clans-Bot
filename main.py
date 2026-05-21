@@ -23,6 +23,8 @@
 # wait 10 seconds
 # bot11.py start -> bot11.py running -> bot11.py end
 # wait 10 seconds
+# bot12.py start -> bot12.py running -> bot12.py end
+#wait 10 seconds
 
 # run again like a loop  again and again
 # bot1.py start -> bot1.py running -> bot1.py end 
@@ -47,6 +49,8 @@
 # wait 10 seconds
 # bot11.py start -> bot11.py running -> bot11.py end
 # wait 10 seconds
+# bot12.py start -> bot12.py running -> bot12.py end
+# wait 10 seconds
 
 import tkinter as tk
 from tkinter import ttk, scrolledtext
@@ -58,7 +62,7 @@ import threading
 # List of all your bot scripts
 BOT_SCRIPTS = [
     "bot1.py", "bot2.py", "bot3.py", "bot4.py", "bot5.py",
-    "bot6.py", "bot7.py", "bot8.py", "bot9.py", "bot10.py", "bot11.py"
+    "bot6.py", "bot7.py", "bot8.py", "bot9.py", "bot10.py", "bot11.py", "bot12.py"
 ]
 WAIT_TIME = 10
 
