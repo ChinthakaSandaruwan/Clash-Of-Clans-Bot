@@ -16,21 +16,13 @@ image_sequence = [
     '(4)Return Home.png'          # පියවර 4
 ]
 
-print("--- Clash of Clans Fully Automated Bot ආරම්භ වුණා ---")
+print("--- Clash of Clans Automated Bot (Single Run) ආරම්භ වුණා ---")
 print("පින්තූර පිළිවෙලට පරීක්ෂා කරමින් පවතී...\n")
 
 current_step = 0  # ආරම්භක පියවර 
 
-while True:
-    # සියලුම පියවර අවසන් වූ පසු නැවත පළමු පියවරට (Loop) මාරු වේ
-    if current_step >= len(image_sequence):
-        print("\n==========================================")
-        print("[SUCCESS] සියලුම Attack පියවරවල් සාර්ථකව අවසන්!")
-        print("නැවත මුල සිට (පළමු පියවරේ සිට) ආරම්භ වේ...")
-        print("==========================================\n")
-        current_step = 0
-        time.sleep(3)
-
+# REMOVED: while True loop - now runs only once through all steps
+while current_step < len(image_sequence):
     target_image = image_sequence[current_step]
     print(f"සොයමින් පවතී: {target_image} (පියවර {current_step + 1}/{len(image_sequence)})", end="\r")
 
@@ -206,14 +198,6 @@ while True:
                 pyautogui.click(1208, 1101)
                 time.sleep(0.55)
                 
-                
-                
-                
-                
-                
-                
-                
-                
                 print("[SUCCESS] Attack Macro එක අවසන් වුණා. දැන් Return Home Button එක එනතුරු බලන් සිටී...\n")
             
             # සාර්ථකව ක්ලික් වූ (සහ Macro එක අවසන් වූ) පසු ඊළඟ පියවරට (Next Step) යයි
@@ -226,3 +210,9 @@ while True:
         print(f"\n[ERROR] බලාපොරොත්තු නොවූ දෝෂයක්: {e}")
         
     time.sleep(0.5)
+
+# Program ends automatically after completing all 4 steps
+print("\n==========================================")
+print("[SUCCESS] එක් Attack එකක් සාර්ථකව අවසන්!")
+print("Program එක දැන් නතර වේ.")
+print("==========================================")
