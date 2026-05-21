@@ -73,7 +73,8 @@ while True:
                 print("\n🚀 [MACRO] භටයින් සිතියමට මුදා හැරීම (Troop Deployment) ආරම්භ කළා...")
                 
                 
-                
+                 # 10 second sleep for load to attack base 
+                time.sleep(10)  
                 #Electro Dragons
                 #Electro Dragon Select   
                 pyautogui.click(263, 1119)
