@@ -1,50 +1,66 @@
 # Clash of Clans Attack Bot
 
-This repository contains a set of Python automation scripts for running Clash of Clans attack sequences using screen image matching and mouse automation.
+Lightweight collection of Python automation scripts to run attack sequences in Clash of Clans using screen image matching and mouse automation.
 
-## Files
+**Quick summary**
+- Automates repeated attack flows using `pyautogui` image matching and simple control logic.
+- Designed for a single-screen, fixed-layout setup (may need adjustments for other resolutions).
 
-- `main.py` — Runs `bot1.py` through `bot10.py` sequentially, waiting 10 seconds between each bot.
-- `bot1.py` through `bot10.py` — Individual bot scripts that perform a full attack sequence using `pyautogui` and image recognition.
-- `*.png` — Reference screenshots used by `pyautogui.locateOnScreen` to find attack buttons and control flow.
-- `Dev Files/` — Additional development files and logs.
+**Project layout**
+- `main.py`: orchestrates running the individual bot scripts sequentially.
+- `bot1.py` … `bot10.py`: individual attack scripts (one per run).
+- `*.png`: reference screenshots used by `pyautogui.locateOnScreen`.
+- `Dev Files/`: development helpers and logs.
 
-## Requirements
-
-- Python 3.x
+Requirements
+- Python 3.8+ (or 3.x)
 - `pyautogui`
-- `pynput`
+- `pynput` (used for optional input control)
 
-Install dependencies with:
+Install dependencies:
 
 ```bash
 pip install pyautogui pynput
 ```
 
-## Usage
+Usage
 
-1. Make sure Clash of Clans is running and visible on your screen.
-2. Place the required reference images in the project folder:
+1. Start Clash of Clans and make sure the game window is visible and its UI matches the reference screenshots.
+2. Place the required reference images into the project root (examples used by the scripts):
    - `(1)attack!.png`
    - `(2)Find a Match 1700.png`
    - `(3)Attack!.png`
    - `(4)Return Home.png`
-3. Run the full sequence:
+3. To run a single bot script:
+
+```bash
+python bot1.py
+```
+
+4. To run the full sequence (runs `bot1.py` → `bot10.py` with short pauses):
 
 ```bash
 python main.py
 ```
 
-This will execute each bot script in order from `bot1.py` to `bot10.py`, pausing 10 seconds between each run.
+Notes and tips
 
-## Notes
+- The scripts rely on pixel-based image matching; results vary by screen resolution, scaling, and theme. If images are not found, re-capture screenshots at your current resolution and update the `*.png` files.
+- To adapt for other resolutions, update coordinates and reference images inside each `bot*.py`.
 
-- Each bot script uses `pyautogui` image matching to click UI elements.
-- The scripts assume a fixed screen layout and coordinate positions.
-- Modify the bot scripts if your screen resolution or game UI positions differ.
+Safety & cautions
 
-## Caution
+- These scripts control your mouse and keyboard. Do not run them while using your machine for other tasks.
+- `pyautogui.FAILSAFE` is enabled: move the mouse to a corner to abort.
+- Automation may violate game terms of service. Use at your own risk.
 
-- These scripts control your mouse and keyboard automatically.
-- Keep your system idle while the scripts run to avoid accidental interruptions.
-- `pyautogui.FAILSAFE` is enabled, so moving the mouse to a screen corner will stop the script.
+Development
+
+- Use [Dev Files](Dev%20Files/) for helpers and experiments.
+- If you want, I can help: extract common utilities, add a `requirements.txt`, or add a safer dry-run mode.
+
+License & credits
+
+- This repository is provided as-is. Modify and use responsibly.
+
+
