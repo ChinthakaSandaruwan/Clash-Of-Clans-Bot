@@ -1,4 +1,5 @@
 import pyautogui
+import os
 import time
 from pynput.mouse import Controller
 
@@ -22,7 +23,7 @@ while current_step < len(image_sequence):
     print(f"Searching: {target_image} (Step {current_step + 1}/{len(image_sequence)})", end="\r")
 
     try:
-        location = pyautogui.locateOnScreen(target_image, confidence=0.8)
+        location = pyautogui.locateOnScreen(os.path.join(os.path.dirname(os.path.abspath(__file__)), target_image), confidence=0.8)
         
         if location is not None:
             print(f"\n[FOUND] {target_image}")
@@ -53,15 +54,6 @@ while current_step < len(image_sequence):
                 # Electro Dragon Select
                 pyautogui.click(263, 1119)
                 time.sleep(4.14)
-                # 6Electro Dragon Drop
-                pyautogui.click(220, 567)
-                time.sleep(0.20)
-                # 7Electro Dragon Drop
-                pyautogui.click(310, 472)
-                time.sleep(0.25)
-                # 8Electro Dragon Drop
-                pyautogui.click(418, 387)
-                time.sleep(0.30)
                 # 9Electro Dragon Drop
                 pyautogui.click(508, 315)
                 time.sleep(0.20)
@@ -86,6 +78,15 @@ while current_step < len(image_sequence):
                 # 5Electro Dragon Drop
                 pyautogui.click(321, 639)
                 time.sleep(0.20)
+                # 6Electro Dragon Drop
+                pyautogui.click(220, 567)
+                time.sleep(0.20)
+                # 7Electro Dragon Drop
+                pyautogui.click(310, 472)
+                time.sleep(0.25)
+                # 8Electro Dragon Drop
+                pyautogui.click(418, 387)
+                time.sleep(0.30)
 
                 # Balloons
                 pyautogui.click(354, 1113)
@@ -109,17 +110,11 @@ while current_step < len(image_sequence):
                 pyautogui.click(211, 542)
                 time.sleep(0.30)
 
-                # Barbarian King
-                pyautogui.click(848, 1097)
-                time.sleep(0.82)
-                pyautogui.click(206, 544)
-                time.sleep(1.32)
-
-                # Royal Champion
-                pyautogui.click(1239, 1095)
-                time.sleep(0.85)
-                pyautogui.click(205, 552)
-                time.sleep(0.98)
+                # Archer Queen
+                pyautogui.click(951, 1076)
+                time.sleep(0.84)
+                pyautogui.click(459, 341)
+                time.sleep(0.99)
 
                 # Grand Warden
                 pyautogui.click(1099, 1063)
@@ -127,13 +122,13 @@ while current_step < len(image_sequence):
                 pyautogui.click(442, 730)
                 time.sleep(1.14)
 
-                # Archer Queen
-                pyautogui.click(951, 1076)
-                time.sleep(0.84)
-                pyautogui.click(459, 341)
-                time.sleep(0.99)
+                # Barbarian King
+                pyautogui.click(848, 1097)
+                time.sleep(0.82)
+                pyautogui.click(206, 544)
+                time.sleep(1.32)
 
-                # Royal Champion (duplicate in original)
+                # Royal Champion
                 pyautogui.click(1239, 1095)
                 time.sleep(0.85)
                 pyautogui.click(205, 552)

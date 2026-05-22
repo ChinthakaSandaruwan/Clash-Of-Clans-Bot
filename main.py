@@ -61,8 +61,8 @@ import threading
 
 # List of all your bot scripts
 BOT_SCRIPTS = [
-    "bot1.py", "bot2.py", "bot3.py", "bot4.py", "bot5.py",
-    "bot6.py", "bot7.py", "bot8.py", "bot9.py", "bot10.py", "bot11.py", "bot12.py"
+    "Normal Battle/bot1.py", "Normal Battle/bot2.py", "Normal Battle/bot3.py", "Normal Battle/bot4.py", "Normal Battle/bot5.py",
+    "Normal Battle/bot6.py", "Normal Battle/bot7.py", "Normal Battle/bot8.py", "Normal Battle/bot9.py", "Normal Battle/bot10.py", "Normal Battle/bot11.py", "Normal Battle/bot12.py"
 ]
 WAIT_TIME = 10
 

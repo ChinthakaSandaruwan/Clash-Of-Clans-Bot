@@ -1,4 +1,5 @@
 import pyautogui
+import os
 import time
 from pynput.mouse import Controller
 
@@ -28,7 +29,7 @@ while current_step < len(image_sequence):
 
     try:
         # Check whether the target step image is present on the screen
-        location = pyautogui.locateOnScreen(target_image, confidence=0.8)
+        location = pyautogui.locateOnScreen(os.path.join(os.path.dirname(os.path.abspath(__file__)), target_image), confidence=0.8)
         
         if location is not None:
             print(f"\n[FOUND] {target_image} image found on the screen!")
