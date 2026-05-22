@@ -58,6 +58,7 @@ import subprocess
 import time
 import os
 import threading
+import random
 
 # List of all your bot scripts
 BOT_SCRIPTS = [
@@ -75,6 +76,7 @@ class BotRunnerGUI:
         
         # State variables
         self.is_running = False
+        self.use_random = False
         self.automation_thread = None
         
         self.setup_ui()
@@ -86,6 +88,9 @@ class BotRunnerGUI:
         
         self.start_btn = ttk.Button(control_frame, text="▶ Start Automation", command=self.start_automation)
         self.start_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.random_start_btn = ttk.Button(control_frame, text="🔀 Random Start Automation", command=self.start_random_automation)
+        self.random_start_btn.pack(side=tk.LEFT, padx=5)
         
         self.stop_btn = ttk.Button(control_frame, text="⏹ Stop Loop", command=self.stop_automation, state=tk.DISABLED)
         self.stop_btn.pack(side=tk.LEFT, padx=5)
@@ -130,7 +135,21 @@ class BotRunnerGUI:
     def start_automation(self):
         if not self.is_running:
             self.is_running = True
+            self.use_random = False
             self.start_btn.config(state=tk.DISABLED)
+            self.random_start_btn.config(state=tk.DISABLED)
+            self.stop_btn.config(state=tk.NORMAL)
+            
+            # Run the automation loop in a separate thread so the GUI doesn't freeze
+            self.automation_thread = threading.Thread(target=self.run_loop_sequence, daemon=True)
+            self.automation_thread.start()
+
+    def start_random_automation(self):
+        if not self.is_running:
+            self.is_running = True
+            self.use_random = True
+            self.start_btn.config(state=tk.DISABLED)
+            self.random_start_btn.config(state=tk.DISABLED)
             self.stop_btn.config(state=tk.NORMAL)
             
             # Run the automation loop in a separate thread so the GUI doesn't freeze
@@ -151,7 +170,13 @@ class BotRunnerGUI:
             self.log(f"\n=========================================\n  STARTING LOOP ITERATION #{loop_count}\n=========================================")
             self.update_status("Running Sequence", loop_text=str(loop_count))
             
-            for bot in BOT_SCRIPTS:
+            # Determine execution order: random selection or sequential order
+            if self.use_random:
+                sequence = [random.choice(BOT_SCRIPTS) for _ in range(len(BOT_SCRIPTS))]
+            else:
+                sequence = BOT_SCRIPTS
+            
+            for bot in sequence:
                 if not self.is_running:
                     break
                     
@@ -187,6 +212,7 @@ class BotRunnerGUI:
         self.log("\n[✓] Automation loop stopped entirely.")
         self.update_status("Idle", bot_text="None")
         self.start_btn.config(state=tk.NORMAL)
+        self.random_start_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.DISABLED)
 
 if __name__ == "__main__":
