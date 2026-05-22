@@ -4,17 +4,17 @@ from pynput.mouse import Button
 from pynput.keyboard import Key
 
 print("=== Real-Time Delay, Click, Scroll & Keyboard Capturer ===")
-print("දැන් ගේම් එකට/app එකට ගිහින් ඔයා සාමාන්‍යයෙන් කරන වැඩ ටික කරන්න.")
-print("පළමු Click 3 මඟ හරින අතර 4 වන Click එකේ සිට සැබෑ වෙලාව (Delay) මැන සේව් කරයි.")
-print("වැඩේ ඉවර වුණාම Mouse එකේ 'Right Click' එකක් කරන්න.\n")
+print("Now go to the game/app and perform your normal actions.")
+print("The first 3 clicks will be skipped, and from the 4th click onwards, the real delay will be measured and saved.")
+print("When you are finished, perform a 'Right Click' with your mouse.\n")
 
 last_action_time = None
 file_path = "actions_log.txt"
 
-# 🌟 Click වාර ගණන මැනීමට ගෝලීය කවුන්ටරයක් (Counter)
+# 🌟 Global counter to measure the number of clicks
 click_count = 0
 
-# File එක අලුතින් open කරලා header එකක් දාමු
+# Open the file freshly and write a header
 with open(file_path, "a", encoding="utf-8") as f:
     f.write(f"\n--- New Session ({time.strftime('%Y-%m-%d %H:%M:%S')}) ---\n")
 
@@ -31,7 +31,7 @@ def get_delay():
     return delay
 
 def log_action(action_str):
-    """Actions log file එකට ලියන පොදු function එක"""
+    """Common function to write actions into the log file"""
     delay = get_delay()
     log_line = f"{action_str}\ntime.sleep({delay})\n\n"
     with open(file_path, "a", encoding="utf-8") as f:
@@ -44,25 +44,25 @@ def on_click(x, y, button, pressed):
     
     if pressed:
         if button == Button.right:
-            print("\n[Finished] සේව් වුණා. වැඩසටහන නැවැත්තුවා.")
-            return False # Listener නවත්වන්න
+            print("\n[Finished] Saved successfully. Program stopped.")
+            return False # Stop the listener
         
         if button == Button.left:
-            click_count += 1  # Click එකක් සිදුවූ වාර ගණන 1කින් එකතු කරයි
+            click_count += 1  # Increments the click count by 1
             
-            # 🌟 Click වාර ගණන 3 හෝ ඊට අඩු නම් එය මඟ හැරීමට (Skip) සලස්වයි
+            # 🌟 Skips the click if the count is 3 or less
             if click_count <= 3:
-                print(f"[SKIP] පළමු Click 3න් එකක් මඟ හැරියා (Click වාරය: {click_count}/3)")
-                # පළමු ක්ලික් වල කාලය මීළඟ ඒවාට බලපෑම් නොකිරීමට කාලය යාවත්කාලීන කරයි
+                print(f"[SKIP] Skipped one of the first 3 clicks (Click count: {click_count}/3)")
+                # Updates the time so that the duration of the first clicks doesn't affect subsequent ones
                 global last_action_time
                 last_action_time = time.time()
                 return 
             
-            # 4 වන Click එකේ සිට සාමාන්‍ය පරිදි ලොග් වේ
+            # Logs normally starting from the 4th click
             log_action(f"pyautogui.click({x}, {y})")
 
 def on_scroll(x, y, dx, dy):
-    # 🌟 පළමු ක්ලික් 3 අවසන් වනතුරු Scroll ක්‍රියාවන්ද සටහන් නොකරයි
+    # 🌟 Do not log scroll actions until the first 3 clicks are completed
     if click_count < 3:
         return
     scroll_amount = 1000 if dy > 0 else -1000
@@ -70,20 +70,20 @@ def on_scroll(x, y, dx, dy):
 
 # --- Keyboard Function ---
 def on_press(key):
-    # 🌟 පළමු ක්ලික් 3 අවසන් වනතුරු Keyboard ක්‍රියාවන්ද සටහන් නොකරයි
+    # 🌟 Do not log keyboard actions until the first 3 clicks are completed
     if click_count < 3:
         return
         
     try:
-        # සාමාන්‍ය අකුරු සහ අංක (a-z, 0-9)
+        # Standard letters and numbers (a-z, 0-9)
         if hasattr(key, 'char') and key.char is not None:
             log_action(f"pyautogui.write('{key.char}')")
         
-        # Space key එක
+        # Space key
         elif key == Key.space:
             log_action(f"pyautogui.press('space')")
             
-        # Enter key එක
+        # Enter key
         elif key == Key.enter:
             log_action(f"pyautogui.press('enter')")
 
@@ -99,7 +99,7 @@ keyboard_listener = keyboard.Listener(on_press=on_press)
 mouse_listener.start()
 keyboard_listener.start()
 
-# Right click කරනකම් මෙතන රැඳී සිටී
+# Remains here until a right click is performed
 mouse_listener.join()
-# Mouse එක නැවැත්තුවාම keyboard එකත් නවත්වන්න
+# Stop the keyboard listener when the mouse listener stops
 keyboard_listener.stop()

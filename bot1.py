@@ -2,67 +2,67 @@ import pyautogui
 import time
 from pynput.mouse import Controller
 
-# Mouse එක screen එකේ කොනකට වේගයෙන් ගියොත් bot එක නැවතීමේ safety feature එක
+# Safety feature: stop the bot if the mouse moves quickly to a screen corner
 pyautogui.FAILSAFE = True
 
-# pynput mouse controller එකක් සාදා ගැනීම (Scroll කිරීම සඳහා)
+# Create a pynput mouse controller (for scrolling)
 mouse_ctrl = Controller()
 
-# ඔබ ලබාදුන් පින්තූරවල නම් නිවැරදිව පිළිවෙලට මෙහි ඇතුළත් කර ඇත
+# The image file names you provided are listed here in the correct order
 image_sequence = [
-    '(1)attack!.png',             # පියවර 1
-    '(2)Find a Match 1700.png',   # පියවර 2
-    '(3)Attack!.png',             # පියවර 3 (මීට පසු Zoom Out සහ Attack Macro එක සිදුවේ)
-    '(4)Return Home.png'          # පියවර 4
+    '(1)attack!.png',             # step 1
+    '(2)Find a Match 1700.png',   # step 2
+    '(3)Attack!.png',             # step 3 (triggers zoom-out and attack macro)
+    '(4)Return Home.png'          # step 4
 ]
 
-print("--- Clash of Clans Automated Bot (Single Run) ආරම්භ වුණා ---")
-print("පින්තූර පිළිවෙලට පරීක්ෂා කරමින් පවතී...\n")
+print("--- Clash of Clans Automated Bot (Single Run) Started ---")
+print("Checking images in sequence...\n")
 
-current_step = 0  # ආරම්භක පියවර 
+current_step = 0  # starting step
 
 # REMOVED: while True loop - now runs only once through all steps
 while current_step < len(image_sequence):
     target_image = image_sequence[current_step]
-    print(f"සොයමින් පවතී: {target_image} (පියවර {current_step + 1}/{len(image_sequence)})", end="\r")
+    print(f"Searching: {target_image} (Step {current_step + 1}/{len(image_sequence)})", end="\r")
 
     try:
-        # Screen එක මත අදාළ පියවරේ පින්තූරය තිබේදැයි බලයි
+        # Check whether the target step image is present on the screen
         location = pyautogui.locateOnScreen(target_image, confidence=0.8)
         
         if location is not None:
-            print(f"\n[FOUND] {target_image} රූපය Screen එක මත හමු වුණා!")
+            print(f"\n[FOUND] {target_image} image found on the screen!")
             center_point = pyautogui.center(location)
             
-            # මූසිකය අදාළ ස්ථානයට ගෙන ගොස් ක්ලික් කරයි
+            # Move the mouse to the target location and click it
             pyautogui.click(center_point)
-            print(f"[CLICK] Click කළ ස්ථානය: {center_point}")
+            print(f"[CLICK] Click position: {center_point}")
             
-            # 🌟 විශේෂ ක්‍රියාවලිය: පියවර 3 (Attack!) ක්ලික් කළාට පසු සිදුවන දේ
+            # Special handling for step 3 (Attack!) after it is clicked
             if target_image == '(3)Attack!.png':
-                print("[INFO] Attack එක ආරම්භ වුණා. සිතියම Zoom Out කිරීමට සූදානම් වේ...")
-                time.sleep(1) # Attack එක load වීමට තත්පර 1ක් නවතී
+                print("[INFO] Attack started. Preparing to zoom out the map...")
+                time.sleep(1) # wait 1 second for the attack screen to load
                 
-                # 1. Screen එකේ හරියටම මැද Coordinates සොයා ගැනීම
+                # 1. Find the exact center coordinates of the screen
                 screen_width, screen_height = pyautogui.size()
                 center_x = screen_width // 2
                 center_y = screen_height // 2
                 
-                # 2. Mouse එක Screen එකේ මැදටම ගෙන යාම
+                # 2. Move the mouse to the center of the screen
                 pyautogui.moveTo(center_x, center_y, duration=0.3)
-                print(f"[MOVE] Mouse එක Screen මධ්‍යයට ගෙන ගියා: ({center_x}, {center_y})")
+                print(f"[MOVE] Mouse moved to center: ({center_x}, {center_y})")
                 time.sleep(0.5)
                 
-                # 3. දිගු Scroll Out (Zoom Out) එකක් සිදු කිරීම
-                print("[SCROLL] දිගු Zoom Out එකක් සිදු කරයි...")
+                # 3. Perform a long scroll out (zoom out)
+                print("[SCROLL] Performing extended zoom out...")
                 for _ in range(15):
                     mouse_ctrl.scroll(0, -1)
                     time.sleep(0.05)
-                print("[SUCCESS] Zoom Out එක සාර්ථකයි!")
+                print("[SUCCESS] Zoom out complete!")
                 time.sleep(1)
                 
-                # ⚔️ 4. ඔබ ලබාදුන් සැබෑ Attack (Troop Deploy) Macro එක ආරම්භ කිරීම
-                print("\n🚀 [MACRO] භටයින් සිතියමට මුදා හැරීම (Troop Deployment) ආරම්භ කළා...")
+                # 4. Start the provided attack (troop deployment) macro
+                print("\n🚀 [MACRO] Starting troop deployment macro...")
                 
                 # 10 second sleep for load to attack base 
                 time.sleep(10)                 
@@ -198,21 +198,21 @@ while current_step < len(image_sequence):
                 pyautogui.click(1208, 1101)
                 time.sleep(0.55)
                 
-                print("[SUCCESS] Attack Macro එක අවසන් වුණා. දැන් Return Home Button එක එනතුරු බලන් සිටී...\n")
+                print("[SUCCESS] Attack Macro finished. Now waiting for the Return Home Button...\n")
             
-            # සාර්ථකව ක්ලික් වූ (සහ Macro එක අවසන් වූ) පසු ඊළඟ පියවරට (Next Step) යයි
+            # Proceed to the next step after successful click and macro completion
             current_step += 1
             time.sleep(2)
             
     except pyautogui.ImageNotFoundException:
         pass
     except Exception as e:
-        print(f"\n[ERROR] බලාපොරොත්තු නොවූ දෝෂයක්: {e}")
+        print(f"\n[ERROR] Unexpected error occurred: {e}")
         
     time.sleep(0.5)
 
 # Program ends automatically after completing all 4 steps
 print("\n==========================================")
-print("[SUCCESS] එක් Attack එකක් සාර්ථකව අවසන්!")
-print("Program එක දැන් නතර වේ.")
+print("[SUCCESS] One Attack successfully completed!")
+print("Program will now exit.")
 print("==========================================")

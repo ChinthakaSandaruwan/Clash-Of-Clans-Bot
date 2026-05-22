@@ -1,4 +1,4 @@
-# no need GUI , i want run this all bots bot 1 ,bot 2, bot 3, bot 4, bot 5, bot 6 , bot 7, bot 8, bot 9, bot 10  using this main.py file 
+# No Need GUI , i want run this all bots bot 1 ,bot 2, bot 3, bot 4, bot 5, bot 6 , bot 7, bot 8, bot 9, bot 10  Using This Main.py File 
 
 # run logic 
 # bot1.py start -> bot1.py running -> bot1.py end 

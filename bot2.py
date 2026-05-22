@@ -2,13 +2,13 @@ import pyautogui
 import time
 from pynput.mouse import Controller
 
-# Mouse එක screen එකේ කොනකට වේගයෙන් ගියොත් bot එක නැවතීමේ safety feature එක
+# Safety feature to stop the bot if the mouse is quickly moved to a screen corner
 pyautogui.FAILSAFE = True
 
-# pynput mouse controller එකක් සාදා ගැනීම (Scroll කිරීම සඳහා)
+# Create pynput mouse controller (for scrolling)
 mouse_ctrl = Controller()
 
-# ඔබ ලබාදුන් පින්තූරවල නම් නිවැරදිව පිළිවෙලට මෙහි ඇතුළත් කර ඇත
+# The sequence of image names provided, arranged in the correct order
 image_sequence = [
     '(1)attack!.png',
     '(2)Find a Match 1700.png',
