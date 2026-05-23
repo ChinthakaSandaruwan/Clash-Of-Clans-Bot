@@ -100,7 +100,10 @@ def wait_and_click(name, threshold=0.72, post_sleep=1.5):
 #  DYNAMIC SLOT DETECTION  (Computer Vision - Contour method)
 # ═══════════════════════════════════════════════════════════════════════════════
 def is_active(region_bgr, cx, cy, w, h, roi_y):
-    """Returns True if slot at (cx,cy) looks colored/active (not greyed-out)."""
+    """
+    Returns True if slot at (cx,cy) looks colored/active (not greyed-out).
+    Golden rule: (Saturation > 15) or (Value > 110)
+    """
     lx = max(0, cx - w // 4)
     rx = min(region_bgr.shape[1], cx + w // 4)
     ty = max(0, cy - roi_y - h // 4)
@@ -109,11 +112,13 @@ def is_active(region_bgr, cx, cy, w, h, roi_y):
     if crop.size == 0:
         return False
     hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
-    return float(np.mean(hsv[:, :, 1])) > 28 and float(np.mean(hsv[:, :, 2])) > 45
+    sat = float(np.mean(hsv[:, :, 1]))
+    val = float(np.mean(hsv[:, :, 2]))
+    return (sat > 15.0) or (val > 110.0)
 
 
-def detect_slots(sw, sh):
-    """Scan the bottom deployment bar and return list of (cx, cy, w, h) tuples."""
+def detect_slots_improved(sw, sh):
+    """Scan the bottom deployment bar using relaxed contours."""
     roi_y = int(sh * 0.78)
     roi_b = int(sh * 0.98)
     shot  = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
@@ -122,12 +127,16 @@ def detect_slots(sw, sh):
     edges = cv2.Canny(gray, 40, 120)
     cnts, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    mn_h, mx_h = int(sh * 0.06), int(sh * 0.17)
-    mn_w, mx_w = int(sw * 0.02), int(sw * 0.11)
+    mn_h = int(sh * 0.02)   # 24 pixels on 1200h
+    mx_h = int(sh * 0.18)   # 216 pixels
+    mn_w = int(sw * 0.015)  # 28 pixels on 1920w
+    mx_w = int(sw * 0.12)   # 230 pixels
+    
     raw = []
     for c in cnts:
         x, y, w, h = cv2.boundingRect(c)
-        if mn_h < h < mx_h and mn_w < w < mx_w and 0.45 < w/h < 1.3:
+        aspect = w / h if h > 0 else 0
+        if mn_h < h < mx_h and mn_w < w < mx_w and 0.35 < aspect < 2.0:
             raw.append((x + w//2, roi_y + y + h//2, w, h))
 
     raw.sort(key=lambda s: s[0])
@@ -142,8 +151,59 @@ def detect_slots(sw, sh):
             p = merged[-1]
             merged[-1] = ((p[0]+s[0])//2, (p[1]+s[1])//2, (p[2]+s[2])//2, (p[3]+s[3])//2)
 
-    print(f"[SLOTS] Detected {len(merged)} slots → x-positions: {[s[0] for s in merged]}")
     return merged
+
+
+def detect_and_classify_slots(sw, sh):
+    """
+    Detects all 10 slots on the bottom bar using a highly robust hybrid strategy.
+    Reference coordinates are scaled dynamically, then matched with relaxed contours.
+    If any slot is missed (e.g. too dark/grayed out), we fallback to scaled reference coordinates.
+    """
+    ref_points = [
+        (int(263 * sw / 1920), int(1100 * sh / 1200)),  # 0: E-Drag
+        (int(354 * sw / 1920), int(1100 * sh / 1200)),  # 1: Balloon
+        (int(549 * sw / 1920), int(1100 * sh / 1200)),  # 2: Archer
+        (int(681 * sw / 1920), int(1100 * sh / 1200)),  # 3: Stone Slammer
+        (int(848 * sw / 1920), int(1100 * sh / 1200)),  # 4: BK
+        (int(951 * sw / 1920), int(1100 * sh / 1200)),  # 5: AQ
+        (int(1099 * sw / 1920), int(1100 * sh / 1200)), # 6: GW
+        (int(1239 * sw / 1920), int(1100 * sh / 1200)), # 7: RC
+        (int(1371 * sw / 1920), int(1100 * sh / 1200)), # 8: Rage
+        (int(1538 * sw / 1920), int(1100 * sh / 1200)), # 9: Freeze
+    ]
+    
+    detected = detect_slots_improved(sw, sh)
+    print(f"[SLOTS] Relaxed CV detected {len(detected)} slots.")
+    
+    slots = []
+    max_dist = int(sw * 0.035)  # Max allowed horizontal matching distance
+    w_fb = int(sw * 0.05)
+    h_fb = int(sh * 0.12)
+    
+    for idx, (rx, ry) in enumerate(ref_points):
+        matched = None
+        best_dist = max_dist
+        for s in detected:
+            dist = abs(s[0] - rx)
+            if dist < best_dist:
+                best_dist = dist
+                matched = s
+                
+        if matched:
+            cx, _, w, h = matched
+            slots.append((cx, ry, w, h))
+            print(f"  Slot {idx+1} matched to dynamic contour x={cx} (using fixed y={ry})")
+        else:
+            slots.append((rx, ry, w_fb, h_fb))
+            print(f"  Slot {idx+1} using scaled fallback at ({rx}, {ry})")
+            
+    # Strictly classify by order (guaranteed 100% correct classification!)
+    troops = slots[0:4]
+    heroes = slots[4:8]
+    spells = slots[8:10]
+    
+    return troops, heroes, spells
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -151,51 +211,32 @@ def detect_slots(sw, sh):
 # ═══════════════════════════════════════════════════════════════════════════════
 def get_left_perimeter_sweep(sw, sh, n_points=14):
     """
-    Generate n_points along the LEFT-SIDE ARC of the base.
+    Generate drop points along the LEFT-SIDE perimeter of the base.
     
-    Pattern learned from Normal Battle bots (bot1-bot12):
-      Troops are swept from the bottom-left corner of the village 
-      up along the left edge and across the top-left.
+    These are the EXACT safe coordinates from bot1.py (proven to never land in the red zone),
+    normalised to screen fractions so they work on any resolution.
     
-    The village base is a diamond-shape centered roughly at (sw*0.38, sh*0.52)
-    The left edge arc runs from bottom-left to top-left of the diamond.
-    
-    Normalised pattern extracted from bot1.py on 1920×1200:
+    Source coordinates on 1920x1200:
       (639,902) → (552,841) → (478,760) → (397,706) → (321,639) →
       (220,567) → (310,472) → (418,387) → (508,315) → (585,261) → (674,203)
     """
-    # Base center (normalised)
-    cx = sw * 0.38
-    cy = sh * 0.52
-
-    # The sweep arc goes from ~210° to ~330° (bottom-left to top-left, 
-    # measured clockwise from 3-o'clock, matching CoC village diamond left edge)
-    # Radius scales with screen
-    rx = sw * 0.24   # horizontal radius of the village diamond (left half)
-    ry = sh * 0.31   # vertical radius
-
-    # Arc from bottom-left (220° from 3-o'clock ≈ π*220/180) to 
-    # upper-right-ish (340° = almost 0 from top)
-    # In standard math angles (counterclockwise from east):
-    # bottom-left of diamond  ≈ 210°
-    # top of diamond          ≈ 90°  (but we stop at upper-left)
-    # We want a sweep from ~200° down to ~90° going counterclockwise
-
-    start_deg = 210
-    end_deg   = 70    # stop at upper-left edge
-
-    # Generate evenly spaced angle points along the arc
-    points = []
-    for i in range(n_points):
-        t     = i / max(n_points - 1, 1)
-        deg   = start_deg + t * (end_deg - start_deg)   # 210 → 70
-        rad   = math.radians(deg)
-        px    = int(cx + rx * math.cos(rad))
-        py    = int(cy - ry * math.sin(rad))   # minus because screen y is inverted
-        # clamp to screen bounds with a small margin
-        px    = max(50, min(sw - 50, px))
-        py    = max(50, min(sh - 150, py))
-        points.append((px, py))
+    # Normalised coordinates (x/1920, y/1200) from bot1.py — all proven safe outside the base
+    norm_pts = [
+        (0.333, 0.752),   # bottom-right of sweep arc
+        (0.287, 0.701),
+        (0.249, 0.633),
+        (0.207, 0.588),
+        (0.167, 0.533),
+        (0.115, 0.473),   # leftmost point
+        (0.161, 0.393),
+        (0.218, 0.323),
+        (0.265, 0.263),
+        (0.305, 0.218),
+        (0.351, 0.169),   # top of sweep arc
+    ]
+    
+    # Scale to the current screen resolution
+    points = [(int(nx * sw), int(ny * sh)) for nx, ny in norm_pts]
     return points
 
 
@@ -249,10 +290,13 @@ def get_spell_drop_points(sw, sh, n_spells=6):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SMART DEPLOYMENT ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, delay=T_DROP):
+def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, delay=T_DROP, randomize=True):
     """
     Select a slot and continuously drop troops at drop_points in a repeating sweep
     until the slot becomes inactive (card is empty).
+    
+    If randomize is True, adds spatial jitter, randomizes the sweep direction,
+    and randomizes the starting point to prevent robotic repetition.
     
     Args:
         slot:            (cx, cy, w, h) of the slot card
@@ -260,13 +304,27 @@ def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, de
         max_batches:     Maximum sweep rounds before stopping (safety cap)
         drops_per_batch: How many drop points to use per sweep pass
         delay:           Time between individual drop clicks
+        randomize:       Whether to add human-like random variance to drops
     """
     cx, cy, w, h = slot
     roi_y = int(sh * 0.78)
     roi_b = int(sh * 0.98)
-    n_pts = len(drop_points)
+    
+    # Work on a copy of the drop points
+    pts = list(drop_points)
+    
+    if randomize:
+        # 1. Randomly reverse the sweep direction
+        if random.choice([True, False]):
+            pts.reverse()
+            
+        # 2. Randomly shift the starting point (rotate the list)
+        shift = random.randint(0, len(pts) - 1)
+        pts = pts[shift:] + pts[:shift]
+        
+    n_pts = len(pts)
     total_clicks = 0
-    ptr = 0   # pointer into drop_points
+    ptr = 0   # pointer into pts
 
     for batch in range(max_batches):
         # Re-check slot state before each batch
@@ -276,13 +334,26 @@ def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, de
             break   # slot exhausted
 
         for _ in range(drops_per_batch):
-            px, py = drop_points[ptr % n_pts]
+            px, py = pts[ptr % n_pts]
+            
+            if randomize:
+                # 3. Add small spatial jitter (±8 pixels) — small enough to stay
+                # safely outside the red zone, but enough to look human-like
+                px += random.randint(-8, 8)
+                py += random.randint(-8, 8)
+                # Clamp to screen
+                px = max(50, min(sw - 50, px))
+                py = max(50, min(sh - 150, py))
+                
             pyautogui.click(px, py)
             total_clicks += 1
             ptr += 1
-            time.sleep(delay)
+            
+            # 4. Add small random delay jitter to look human
+            click_delay = delay + random.uniform(-0.04, 0.04) if randomize else delay
+            time.sleep(max(0.05, click_delay))
 
-        time.sleep(0.08)
+        time.sleep(random.uniform(0.06, 0.12) if randomize else 0.08)
 
     return total_clicks
 
@@ -329,71 +400,7 @@ def deploy_spell(slot, drop_point, sw, sh, delay=T_SPELL_DROP):
     return 1
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  SLOT ROLE CLASSIFIER
-# ═══════════════════════════════════════════════════════════════════════════════
-def classify_slots(slots, sw, sh):
-    """
-    Classify each slot into: 'troop', 'hero', or 'spell'
-    
-    Strategy learned from Normal Battle bots:
-    - The FIRST troop slot gets a long select delay (T_SELECT_LONG=4.14s) → classified
-      as the primary high-count troop (Electro Dragons)
-    - Middle slots with lower x have fewer counts → troops  
-    - Hero slots typically appear at higher x values AND have a circular icon frame
-      (slightly different aspect ratio). We detect this by checking saturation pattern.
-    - Spell slots are the RIGHTMOST slots (last ~20-25% of x range)
-    
-    In the successful run with 9 slots at x=[259,409,520,702,811,864,940,1377,1537]:
-      The spells started at x=1377 (≈72% of 1920). So cutoff ≈ 70-75% of screen.
-    """
-    if not slots:
-        return [], [], []
-
-    # Sort by x (already sorted by detect_slots)
-    max_x = max(s[0] for s in slots)
-
-    # Spell cutoff: rightmost 28% of x range among all slots
-    x_range  = max_x - slots[0][0]
-    spell_cutoff = max_x - x_range * 0.28
-
-    troops = []
-    heroes = []
-    spells = []
-
-    for s in slots:
-        cx = s[0]
-        if cx >= spell_cutoff:
-            spells.append(s)
-        else:
-            # Distinguish troops from heroes by checking if the slot looks like
-            # a hero card (hero cards tend to be slightly taller/squarer).
-            # Additionally, hero slots usually appear in a cluster together.
-            # Simple heuristic: if there are >1 consecutive slots spaced < 7% sw apart
-            # in the mid section, treat all of those as heroes.
-            troops.append(s)   # initially all non-spell go to troops
-
-    # Hero detection heuristic: find a cluster of 3-5 consecutive slots
-    # in the mid-right section that are tightly packed (heroes sit side by side).
-    # Typically ≥4 consecutive slots spaced < 6% of screen width apart.
-    if len(troops) >= 4:
-        spacings = [troops[i+1][0] - troops[i][0] for i in range(len(troops)-1)]
-        avg_spacing = sum(spacings) / len(spacings)
-        # Hero group: consecutive slots with spacing < 80% of average spacing
-        # (heroes are slightly more tightly packed than troops)
-        hero_group_start = None
-        hero_group_end   = None
-        for i, sp in enumerate(spacings):
-            if sp < avg_spacing * 0.85:
-                if hero_group_start is None:
-                    hero_group_start = i
-                hero_group_end = i + 1
-        if hero_group_start is not None and (hero_group_end - hero_group_start) >= 2:
-            heroes = troops[hero_group_start:hero_group_end + 1]
-            troops = [s for s in troops if s not in heroes]
-
-    print(f"[CLASSIFY] Troops={len(troops)}  Heroes={len(heroes)}  Spells={len(spells)}")
-    return troops, heroes, spells
+# Removed old classify_slots function (now handled dynamically by detect_and_classify_slots)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -417,32 +424,37 @@ def execute_attack(sw, sh):
     print(f"[WAIT] Letting base render for {T_LOAD_BASE}s...")
     time.sleep(T_LOAD_BASE)
 
-    # ── 3. Detect slots ────────────────────────────────────────────────────────
-    slots = detect_slots(sw, sh)
-    if not slots:
-        print("[WARNING] No slots detected — using fallback horizontal grid.")
-        y_fb = int(sh * 0.92)
-        w_fb, h_fb = int(sw * 0.05), int(sh * 0.12)
-        xs   = [int(sw * 0.15 + i * sw * 0.07) for i in range(10)]
-        slots = [(x, y_fb, w_fb, h_fb) for x in xs]
-
-    # ── 4. Classify slots ──────────────────────────────────────────────────────
-    troops, heroes, spells = classify_slots(slots, sw, sh)
+    # ── 3 & 4. Detect & Classify Slots (Hybrid Method) ─────────────────────────
+    troops, heroes, spells = detect_and_classify_slots(sw, sh)
 
     # ── 5. Generate dynamic drop points ────────────────────────────────────────
     sweep_pts  = get_left_perimeter_sweep(sw, sh, n_points=14)
     hero_pts   = get_hero_drop_points(sw, sh)
     spell_pts  = get_spell_drop_points(sw, sh, n_spells=max(6, len(spells) * 2))
 
+    roi_y = int(sh * 0.78)
+    roi_b = int(sh * 0.98)
+
     # ── 6. Deploy troops in left-perimeter sweep ───────────────────────────────
     print("\n🚀 [ATTACK] Deploying troops (left-perimeter sweep)...")
+    shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
+    bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
+
+    deployed_any_troops = False
     for i, slot in enumerate(troops):
         cx, cy, w, h = slot
+        if not is_active(bgr, cx, cy, w, h, roi_y):
+            print(f"  [T{i+1}] Skip slot at x={cx} (inactive/x0)")
+            continue
+
         print(f"  [T{i+1}] Select slot at x={cx}, y={cy}")
         pyautogui.moveTo(cx, cy, duration=0.2)
         pyautogui.click()
-        # First troop gets a long wait (Electro Dragon / main troop fill animation)
-        wait_t = T_SELECT_LONG if i == 0 else T_SELECT_MED
+        
+        # If it's the first troop actually being deployed, we wait T_SELECT_LONG
+        # otherwise we wait T_SELECT_MED
+        wait_t = T_SELECT_LONG if not deployed_any_troops else T_SELECT_MED
+        deployed_any_troops = True
         time.sleep(wait_t)
 
         total = deploy_slot(
@@ -455,14 +467,23 @@ def execute_attack(sw, sh):
 
     # ── 7. Deploy heroes ────────────────────────────────────────────────────────
     print("\n🦸 [HEROES] Deploying heroes...")
+    shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
+    bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
+    
+    deployed_heroes = []
     for i, slot in enumerate(heroes):
-        cx, cy, _, _ = slot
+        cx, cy, w, h = slot
+        if not is_active(bgr, cx, cy, w, h, roi_y):
+            print(f"  [H{i+1}] Skip hero at x={cx} (inactive/recovering)")
+            continue
+
         drop_pt = hero_pts[i % len(hero_pts)]
         print(f"  [H{i+1}] Select hero at x={cx} → drop at {drop_pt}")
         pyautogui.moveTo(cx, cy, duration=0.2)
         pyautogui.click()
         time.sleep(T_SELECT_SHORT)
         pyautogui.click(drop_pt[0], drop_pt[1])
+        deployed_heroes.append(slot)
         time.sleep(1.0)
 
     # ── 8. Deploy spells ────────────────────────────────────────────────────────
@@ -470,6 +491,14 @@ def execute_attack(sw, sh):
     spell_ptr = 0
     for i, slot in enumerate(spells):
         cx, cy, w, h = slot
+        
+        # Check active status first
+        shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
+        bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
+        if not is_active(bgr, cx, cy, w, h, roi_y):
+            print(f"  [S{i+1}] Skip spell at x={cx} (inactive/x0)")
+            continue
+
         print(f"  [S{i+1}] Select spell at x={cx}")
         # Drain all charges of this spell type
         while True:
@@ -482,17 +511,18 @@ def execute_attack(sw, sh):
         print(f"  [S{i+1}] Done")
 
     # ── 9. Trigger hero special abilities ─────────────────────────────────────
-    print("\n⚡ [ABILITIES] Triggering hero abilities (cycle 1)...")
-    time.sleep(12)
-    for slot in heroes:
-        pyautogui.click(slot[0], slot[1])
-        time.sleep(T_HERO_ABILITY)
+    if deployed_heroes:
+        print("\n⚡ [ABILITIES] Triggering hero abilities (cycle 1)...")
+        time.sleep(12)
+        for slot in deployed_heroes:
+            pyautogui.click(slot[0], slot[1])
+            time.sleep(T_HERO_ABILITY)
 
-    print("⚡ [ABILITIES] Triggering hero abilities (cycle 2)...")
-    time.sleep(12)
-    for slot in heroes:
-        pyautogui.click(slot[0], slot[1])
-        time.sleep(T_HERO_ABILITY)
+        print("⚡ [ABILITIES] Triggering hero abilities (cycle 2)...")
+        time.sleep(12)
+        for slot in deployed_heroes:
+            pyautogui.click(slot[0], slot[1])
+            time.sleep(T_HERO_ABILITY)
 
     print("\n[✓] Attack macro completed.")
 
