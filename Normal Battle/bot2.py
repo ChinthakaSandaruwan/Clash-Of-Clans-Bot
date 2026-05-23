@@ -28,7 +28,7 @@ while current_step < len(image_sequence):
     print(f"Searching: {target_image} (Step {current_step + 1}/{len(image_sequence)})", end="\r")
 
     try:
-        location = pyautogui.locateOnScreen(os.path.join(os.path.dirname(os.path.abspath(__file__)), target_image), confidence=0.8)
+        location = pyautogui.locateOnScreen(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Images', target_image), confidence=0.8)
         
         if location is not None:
             print(f"\n[FOUND] {target_image}")
