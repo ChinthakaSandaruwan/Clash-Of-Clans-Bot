@@ -282,7 +282,7 @@ def get_spell_drop_points(sw, sh, n_spells=6):
         px = int(base_x + spread_x * math.cos(angle) + random.uniform(-0.01, 0.01) * sw)
         py = int(base_y + spread_y * math.sin(angle) + random.uniform(-0.01, 0.01) * sh)
         px = max(50, min(sw - 50, px))
-        py = max(50, min(sh - 150, py))
+        py = max(50, min(sh - 150, py)) 
         pts.append((px, py))
     return pts
 
