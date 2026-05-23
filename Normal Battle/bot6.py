@@ -182,6 +182,34 @@ while current_step < len(image_sequence):
         
     time.sleep(0.5)
 
+
+# Check for Star Bonus Received popup (only comes up when star bonus is complete after Return Home)
+print("\n[INFO] Checking for Star Bonus Received window...")
+star_bonus_image = '(0)Star Bonus Received.png'
+star_bonus_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Images', star_bonus_image)
+
+start_time = time.time()
+found_star_bonus = False
+while time.time() - start_time < 10:
+    try:
+        location = pyautogui.locateOnScreen(star_bonus_path, confidence=0.8)
+        if location is not None:
+            print("[FOUND] Star Bonus Received window found!")
+            center_point = pyautogui.center(location)
+            pyautogui.click(center_point)
+            print(f"[CLICK] Clicked OK button at: {center_point}")
+            found_star_bonus = True
+            time.sleep(2)
+            break
+    except pyautogui.ImageNotFoundException:
+        pass
+    except Exception as e:
+        print(f"[ERROR] Error checking for Star Bonus: {e}")
+    time.sleep(0.5)
+
+if not found_star_bonus:
+    print("[INFO] No Star Bonus window detected within timeout.")
+
 print("\n==========================================")
 print("[SUCCESS] Attack completed successfully!")
 print("Program will now exit.")
