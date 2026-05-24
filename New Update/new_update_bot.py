@@ -18,8 +18,32 @@ import os
 import time
 import math
 import random
+import threading
 from PIL import ImageGrab
 from pynput.mouse import Controller
+
+# ─── GUI Thread Control ────────────────────────────────────────────────────────
+bot_paused = threading.Event()
+bot_paused.set()  # Default: not paused (running)
+bot_stopped = False
+forced_side = None
+
+_orig_sleep = time.sleep
+
+def bot_sleep(seconds):
+    global bot_stopped
+    step = 0.05
+    t_spent = 0
+    while t_spent < seconds:
+        if bot_stopped:
+            raise KeyboardInterrupt("Bot stopped by user")
+        bot_paused.wait()  # Block here if paused
+        
+        sleep_time = min(step, seconds - t_spent)
+        _orig_sleep(sleep_time)
+        t_spent += sleep_time
+
+time.sleep = bot_sleep
 
 # ─── Safety ────────────────────────────────────────────────────────────────────
 pyautogui.FAILSAFE = True
@@ -209,6 +233,52 @@ def detect_and_classify_slots(sw, sh):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DYNAMIC DROP-POINT GENERATORS  (learned from Normal Battle bot patterns)
 # ═══════════════════════════════════════════════════════════════════════════════
+def get_attack_side():
+    """
+    Reads state to determine if this attack should be Left or Right side.
+    Cycle:
+      Attack 1: Left side
+      Attack 2: Right side
+      Attack 3: Random (left or right)
+    """
+    global forced_side
+    if forced_side in ["left", "right"]:
+        print(f"\n🎯 [STATE] GUI Forced Attack Side: {forced_side.upper()}")
+        return forced_side
+
+    state_file = os.path.join(script_dir, "new_update_bot_state.txt")
+    attack_count = 1
+    if os.path.exists(state_file):
+        try:
+            with open(state_file, "r") as f:
+                attack_count = int(f.read().strip())
+        except Exception:
+            attack_count = 1
+            
+    # Decide side
+    if attack_count == 1:
+        side = "left"
+        print(f"\n🎯 [STATE] Attack #{attack_count}: Choosing LEFT side.")
+    elif attack_count == 2:
+        side = "right"
+        print(f"\n🎯 [STATE] Attack #{attack_count}: Choosing RIGHT side.")
+    else:
+        side = random.choice(["left", "right"])
+        print(f"\n🎯 [STATE] Attack #{attack_count} (Random): Choosing {side.upper()} side.")
+        
+    # Update state for next run (cycle 1 -> 2 -> 3 -> 1)
+    next_count = attack_count + 1
+    if next_count > 3:
+        next_count = 1
+    try:
+        with open(state_file, "w") as f:
+            f.write(str(next_count))
+    except Exception as e:
+        print(f"[WARNING] Could not save attack state: {e}")
+        
+    return side
+
+
 def get_left_perimeter_sweep(sw, sh, n_points=14):
     """
     Generate drop points along the LEFT-SIDE perimeter of the base.
@@ -240,6 +310,16 @@ def get_left_perimeter_sweep(sw, sh, n_points=14):
     return points
 
 
+def get_right_perimeter_sweep(sw, sh, n_points=14):
+    """
+    Generate drop points along the RIGHT-SIDE perimeter of the base.
+    This is created by mirroring the left perimeter coordinates horizontally.
+    """
+    left_pts = get_left_perimeter_sweep(sw, sh, n_points)
+    # Mirror x around center: mirrored_x = sw - x
+    return [(sw - x, y) for x, y in left_pts]
+
+
 def get_hero_drop_points(sw, sh):
     """
     Return 4 hero drop positions along the left edge, spread vertically.
@@ -259,19 +339,50 @@ def get_hero_drop_points(sw, sh):
     ]
 
 
-def get_spell_drop_points(sw, sh, n_spells=6):
+def get_right_hero_drop_points(sw, sh):
     """
-    Return n_spells drop points scattered in the center-right interior area.
-    
-    Rage spell targets from bots (normalised on 1920×1200):
-      (880,689) → (776,594) → (772,492) → (906,448) → (899,545)
-    Freeze: (980,555)
-    
-    These are in the right half of the base interior.
-    We generate a small random cluster in that region.
+    Return 4 hero drop positions along the right edge, mirrored from left.
     """
-    # Center-right interior zone (normalised)
-    base_x = sw * 0.46
+    left_pts = get_hero_drop_points(sw, sh)
+    return [(sw - x, y) for x, y in left_pts]
+
+
+def shift_outwards(points, sw, sh, side="left", offset_px=30):
+    """
+    Shifts coordinates outwards from the center of the screen to prevent
+    hitting base red zones on retry passes.
+    """
+    center_x = sw // 2
+    center_y = sh // 2
+    shifted = []
+    for x, y in points:
+        dx = x - center_x
+        dy = y - center_y
+        dist = math.hypot(dx, dy)
+        if dist > 0:
+            nx = x + int((dx / dist) * offset_px)
+            ny = y + int((dy / dist) * offset_px)
+            # clamp to screen
+            nx = max(50, min(sw - 50, nx))
+            ny = max(50, min(sh - 150, ny))
+            shifted.append((nx, ny))
+        else:
+            shifted.append((x, y))
+    return shifted
+
+
+def get_spell_drop_points(sw, sh, side="left", n_spells=6):
+    """
+    Return n_spells drop points scattered in the interior area.
+    If side is 'left' (attacking from left), drops spells in the center-right interior zone.
+    If side is 'right' (attacking from right), drops spells in the center-left interior zone.
+    """
+    # Center-right interior zone for left attack, center-left for right attack
+    if side == "left":
+        base_x = sw * 0.46
+    else:
+        base_x = sw * 0.54
+
     base_y = sh * 0.42
     spread_x = sw * 0.08
     spread_y = sh * 0.20
@@ -406,9 +517,30 @@ def deploy_spell(slot, drop_point, sw, sh, delay=T_SPELL_DROP):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  MAIN ATTACK ROUTINE
 # ═══════════════════════════════════════════════════════════════════════════════
-def execute_attack(sw, sh):
+def execute_attack(sw, sh, army_config=None):
+    """
+    Execute one attack. If army_config is provided (from GUI), use configured
+    troop counts, hero enable/skip flags and spell counts.
+    army_config = {
+        'troops':  [{'name': 'EDrag', 'count': 11}, ...],   # T1-T4
+        'heroes':  [{'name': 'BK', 'enabled': True}, ...],  # H1-H4
+        'spells':  [{'name': 'Rage', 'count': 5}, ...],     # S1-S2
+    }
+    """
     cx_screen = sw // 2
     cy_screen = sh // 2
+
+    # Parse army_config once
+    troop_counts  = None
+    hero_enabled  = None
+    spell_counts  = None
+    if army_config:
+        t = army_config.get("troops", [])
+        h = army_config.get("heroes", [])
+        s = army_config.get("spells", [])
+        if t: troop_counts = [max(1, entry.get("count", 1)) for entry in t]
+        if h: hero_enabled  = [entry.get("enabled", True) for entry in h]
+        if s: spell_counts  = [max(1, entry.get("count", 1)) for entry in s]
 
     # ── 1. Zoom out ────────────────────────────────────────────────────────────
     pyautogui.moveTo(cx_screen, cy_screen, duration=0.3)
@@ -428,15 +560,21 @@ def execute_attack(sw, sh):
     troops, heroes, spells = detect_and_classify_slots(sw, sh)
 
     # ── 5. Generate dynamic drop points ────────────────────────────────────────
-    sweep_pts  = get_left_perimeter_sweep(sw, sh, n_points=14)
-    hero_pts   = get_hero_drop_points(sw, sh)
-    spell_pts  = get_spell_drop_points(sw, sh, n_spells=max(6, len(spells) * 2))
+    side = get_attack_side()
+    if side == "left":
+        sweep_pts = get_left_perimeter_sweep(sw, sh, n_points=14)
+        hero_pts  = get_hero_drop_points(sw, sh)
+    else:
+        sweep_pts = get_right_perimeter_sweep(sw, sh, n_points=14)
+        hero_pts  = get_right_hero_drop_points(sw, sh)
+
+    spell_pts  = get_spell_drop_points(sw, sh, side=side, n_spells=max(6, len(spells) * 2))
 
     roi_y = int(sh * 0.78)
     roi_b = int(sh * 0.98)
 
-    # ── 6. Deploy troops in left-perimeter sweep ───────────────────────────────
-    print("\n🚀 [ATTACK] Deploying troops (left-perimeter sweep)...")
+    # ── 6. Deploy troops in perimeter sweep ───────────────────────────────
+    print(f"\n🚀 [ATTACK] Deploying troops ({side}-perimeter sweep)...")
     shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
     bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
 
@@ -450,35 +588,80 @@ def execute_attack(sw, sh):
         print(f"  [T{i+1}] Select slot at x={cx}, y={cy}")
         pyautogui.moveTo(cx, cy, duration=0.2)
         pyautogui.click()
-        
-        # If it's the first troop actually being deployed, we wait T_SELECT_LONG
-        # otherwise we wait T_SELECT_MED
+
         wait_t = T_SELECT_LONG if not deployed_any_troops else T_SELECT_MED
         deployed_any_troops = True
         time.sleep(wait_t)
 
+        # ── Determine click count from army_config or defaults ─────────────
+        if i == 3:
+            # Siege Machine always exactly 1 drop
+            max_b, drops_pb = 1, 1
+        elif troop_counts and i < len(troop_counts):
+            count = troop_counts[i]
+            max_b, drops_pb = count, 1   # 1 click per batch × count batches
+            troop_name = army_config["troops"][i]["name"] if army_config else f"T{i+1}"
+            print(f"  [T{i+1}] Army config: deploying {count}× {troop_name}")
+        else:
+            max_b, drops_pb = 12, 4     # default auto-drain
+
         total = deploy_slot(
             slot, sweep_pts, sw, sh,
-            max_batches=12,
-            drops_per_batch=4,
+            max_batches=max_b,
+            drops_per_batch=drops_pb,
             delay=T_DROP
         )
         print(f"  [T{i+1}] Done  ({total} drops)")
+
+    # ── 6.5. Retry active troops that failed to deploy (e.g. hit red line) ────
+    print("\n🔍 [RETRY] Checking if any troops failed to deploy...")
+    time.sleep(1.0)
+    shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
+    bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
+
+    retry_sweep_pts = shift_outwards(sweep_pts, sw, sh, side=side, offset_px=30)
+
+    for i, slot in enumerate(troops):
+        cx, cy, w, h = slot
+        if is_active(bgr, cx, cy, w, h, roi_y):
+            print(f"  ⚠️ [T{i+1} RETRY] Slot at x={cx} is still active! Retrying...")
+            pyautogui.moveTo(cx, cy, duration=0.2)
+            pyautogui.click()
+            time.sleep(T_SELECT_MED)
+
+            max_b = 1 if i == 3 else 6
+            drops_pb = 1 if i == 3 else 4
+
+            total = deploy_slot(
+                slot, retry_sweep_pts, sw, sh,
+                max_batches=max_b,
+                drops_per_batch=drops_pb,
+                delay=T_DROP
+            )
+            print(f"  [T{i+1} RETRY] Done  ({total} drops)")
 
     # ── 7. Deploy heroes ────────────────────────────────────────────────────────
     print("\n🦸 [HEROES] Deploying heroes...")
     shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
     bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
-    
+
     deployed_heroes = []
     for i, slot in enumerate(heroes):
         cx, cy, w, h = slot
+
+        # ── Check if hero is disabled in army_config ───────────────────────
+        if hero_enabled and i < len(hero_enabled) and not hero_enabled[i]:
+            hero_name = army_config["heroes"][i]["name"] if army_config else f"H{i+1}"
+            print(f"  [H{i+1}] Skip {hero_name} (disabled in army config)")
+            continue
+
         if not is_active(bgr, cx, cy, w, h, roi_y):
             print(f"  [H{i+1}] Skip hero at x={cx} (inactive/recovering)")
             continue
 
         drop_pt = hero_pts[i % len(hero_pts)]
-        print(f"  [H{i+1}] Select hero at x={cx} → drop at {drop_pt}")
+        hero_name = army_config["heroes"][i]["name"] if (army_config and i < len(army_config.get("heroes", []))) else f"H{i+1}"
+        print(f"  [H{i+1}] Deploy {hero_name} at x={cx} → drop at {drop_pt}")
         pyautogui.moveTo(cx, cy, duration=0.2)
         pyautogui.click()
         time.sleep(T_SELECT_SHORT)
@@ -491,24 +674,28 @@ def execute_attack(sw, sh):
     spell_ptr = 0
     for i, slot in enumerate(spells):
         cx, cy, w, h = slot
-        
-        # Check active status first
+
         shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
         bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
         if not is_active(bgr, cx, cy, w, h, roi_y):
             print(f"  [S{i+1}] Skip spell at x={cx} (inactive/x0)")
             continue
 
-        print(f"  [S{i+1}] Select spell at x={cx}")
-        # Drain all charges of this spell type
-        while True:
+        # ── Determine spell count from army_config ─────────────────────────
+        remaining = spell_counts[i] if (spell_counts and i < len(spell_counts)) else 99
+        spell_name = army_config["spells"][i]["name"] if (army_config and i < len(army_config.get("spells", []))) else f"S{i+1}"
+        print(f"  [S{i+1}] Deploy {spell_name} (max {remaining} casts) at x={cx}")
+
+        casts = 0
+        while casts < remaining:
             drop_pt = spell_pts[spell_ptr % len(spell_pts)]
             deployed = deploy_spell(slot, drop_pt, sw, sh)
             if not deployed:
                 break
             spell_ptr += 1
+            casts += 1
             time.sleep(T_SPELL_DROP)
-        print(f"  [S{i+1}] Done")
+        print(f"  [S{i+1}] Done  ({casts} casts)")
 
     # ── 9. Trigger hero special abilities ─────────────────────────────────────
     if deployed_heroes:
@@ -530,7 +717,7 @@ def execute_attack(sw, sh):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  MAIN FLOW
 # ═══════════════════════════════════════════════════════════════════════════════
-def main():
+def main(army_config=None):
     print("╔══════════════════════════════════════════════════╗")
     print("║  Clash of Clans – New Update Dynamic Attack Bot  ║")
     print("╚══════════════════════════════════════════════════╝")
@@ -551,7 +738,7 @@ def main():
 
     # Phase 4 – Execute dynamic attack
     print("[Phase 4] Executing dynamic attack...")
-    execute_attack(sw, sh)
+    execute_attack(sw, sh, army_config=army_config)
 
     # Phase 5 – Return Home
     print("[Phase 5] Waiting for Return Home...")

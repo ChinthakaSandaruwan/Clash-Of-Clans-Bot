@@ -1,0 +1,48 @@
+{
+  "troops": [
+    {
+      "name": "Electro Dragon",
+      "count": 11
+    },
+    {
+      "name": "Balloon",
+      "count": 3
+    },
+    {
+      "name": "Archer",
+      "count": 1
+    },
+    {
+      "name": "Stone Slammer",
+      "count": 1
+    }
+  ],
+  "heroes": [
+    {
+      "name": "Barbarian King",
+      "enabled": true
+    },
+    {
+      "name": "Archer Queen",
+      "enabled": true
+    },
+    {
+      "name": "Grand Warden",
+      "enabled": true
+    },
+    {
+      "name": "Royal Champion",
+      "enabled": true
+    }
+  ],
+  "spells": [
+    {
+      "name": "Rage",
+      "count": 5
+    },
+    {
+      "name": "Freeze",
+      "count": 1
+    }
+  ]
+}
