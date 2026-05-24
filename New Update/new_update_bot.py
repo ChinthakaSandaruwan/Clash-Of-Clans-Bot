@@ -622,6 +622,9 @@ def execute_attack(sw, sh, army_config=None):
     retry_sweep_pts = shift_outwards(sweep_pts, sw, sh, side=side, offset_px=30)
 
     for i, slot in enumerate(troops):
+        if i == 3:
+            # Never retry Siege Machine to avoid triggering early manual release
+            continue
         cx, cy, w, h = slot
         if is_active(bgr, cx, cy, w, h, roi_y):
             print(f"  ⚠️ [T{i+1} RETRY] Slot at x={cx} is still active! Retrying...")
