@@ -199,6 +199,14 @@ class BotGUIController:
         self.cooldown_spin = styled_spin(r1, self.cooldown_var, 1, 3600)
         self.cooldown_spin.pack(side=tk.LEFT, padx=8)
 
+        # Hero Ability Delay row
+        r1_5 = tk.Frame(sf, bg=CLR_PANEL)
+        r1_5.pack(fill=tk.X, pady=3)
+        styled_label(r1_5, "Hero Ability Delay (sec):", font=FONT_HEAD).pack(side=tk.LEFT)
+        self.ability_delay_var = tk.IntVar(value=4)
+        self.ability_delay_spin = styled_spin(r1_5, self.ability_delay_var, 0, 120)
+        self.ability_delay_spin.pack(side=tk.LEFT, padx=8)
+
         # Strategy row
         r2 = tk.Frame(sf, bg=CLR_PANEL)
         r2.pack(fill=tk.X, pady=3)
@@ -367,7 +375,12 @@ class BotGUIController:
                    "enabled": self.hero_enabled_vars[i].get()} for i in range(4)]
         spells = [{"name": self.spell_name_vars[i].get(),
                    "count": self.spell_count_vars[i].get()} for i in range(2)]
-        return {"troops": troops, "heroes": heroes, "spells": spells}
+        return {
+            "troops": troops,
+            "heroes": heroes,
+            "spells": spells,
+            "hero_ability_delay": self.ability_delay_var.get()
+        }
 
     def _save_army(self):
         cfg = self._army_config_dict()
@@ -398,6 +411,9 @@ class BotGUIController:
                 self.spell_name_vars[i].set(s.get("name", ""))
                 self.spell_count_vars[i].set(s.get("count", 1))
 
+            if "hero_ability_delay" in cfg:
+                self.ability_delay_var.set(cfg["hero_ability_delay"])
+
             print("[ARMY] Config loaded from army_config.json")
         except Exception as e:
             messagebox.showerror("Load Error", str(e))
@@ -415,7 +431,8 @@ class BotGUIController:
         # Configure standard widgets
         for w in [self.loop_spin, 
                   self.infinite_check if hasattr(self, "infinite_check") else None,
-                  self.cooldown_spin if hasattr(self, "cooldown_spin") else None]:
+                  self.cooldown_spin if hasattr(self, "cooldown_spin") else None,
+                  self.ability_delay_spin if hasattr(self, "ability_delay_spin") else None]:
             if w:
                 try:
                     w.configure(state=state)

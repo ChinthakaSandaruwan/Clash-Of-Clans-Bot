@@ -27,6 +27,7 @@ bot_paused = threading.Event()
 bot_paused.set()  # Default: not paused (running)
 bot_stopped = False
 forced_side = None
+hero_ability_delay = 4
 
 _orig_sleep = time.sleep
 
@@ -531,6 +532,7 @@ def execute_attack(sw, sh, army_config=None):
     cy_screen = sh // 2
 
     # Parse army_config once
+    global hero_ability_delay
     troop_counts  = None
     hero_enabled  = None
     spell_counts  = None
@@ -541,6 +543,8 @@ def execute_attack(sw, sh, army_config=None):
         if t: troop_counts = [max(1, entry.get("count", 1)) for entry in t]
         if h: hero_enabled  = [entry.get("enabled", True) for entry in h]
         if s: spell_counts  = [max(1, entry.get("count", 1)) for entry in s]
+        if "hero_ability_delay" in army_config:
+            hero_ability_delay = army_config["hero_ability_delay"]
 
     # ── 1. Zoom out ────────────────────────────────────────────────────────────
     pyautogui.moveTo(cx_screen, cy_screen, duration=0.3)
@@ -702,14 +706,15 @@ def execute_attack(sw, sh, army_config=None):
 
     # ── 9. Trigger hero special abilities ─────────────────────────────────────
     if deployed_heroes:
-        print("\n⚡ [ABILITIES] Triggering hero abilities (cycle 1)...")
-        time.sleep(12)
+        print(f"\n⚡ [ABILITIES] Triggering hero abilities (cycle 1) in {hero_ability_delay}s...")
+        time.sleep(hero_ability_delay)
         for slot in deployed_heroes:
             pyautogui.click(slot[0], slot[1])
             time.sleep(T_HERO_ABILITY)
 
-        print("⚡ [ABILITIES] Triggering hero abilities (cycle 2)...")
-        time.sleep(12)
+        fallback_delay = min(5, hero_ability_delay)
+        print(f"⚡ [ABILITIES] Triggering hero abilities (cycle 2 fallback) in {fallback_delay}s...")
+        time.sleep(fallback_delay)
         for slot in deployed_heroes:
             pyautogui.click(slot[0], slot[1])
             time.sleep(T_HERO_ABILITY)

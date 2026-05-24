@@ -44,5 +44,6 @@
       "name": "Freeze",
       "count": 1
     }
-  ]
+  ],
+  "hero_ability_delay": 5
 }
