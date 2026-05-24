@@ -402,14 +402,58 @@ def get_spell_drop_points(sw, sh, side="left", n_spells=6):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SMART DEPLOYMENT ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
+def _safe_cancel_spot(sw, sh):
+    """
+    Returns a random safe interior map coordinate that is away from the base
+    perimeter red-lines. Used to cancel a stuck troop selection after a red-line
+    click error. Position is in the far edge of the visible map area.
+    """
+    # Pick a corner near the edge of the map — guaranteed clear of any base structure
+    candidates = [
+        # Top-left map corner
+        (int(sw * 0.08), int(sh * 0.12)),
+        # Top-right map corner
+        (int(sw * 0.92), int(sh * 0.12)),
+        # Bottom-left (outside deployment bar)
+        (int(sw * 0.08), int(sh * 0.72)),
+        # Bottom-right (outside deployment bar)
+        (int(sw * 0.92), int(sh * 0.72)),
+    ]
+    x, y = random.choice(candidates)
+    # Add a small random jitter so repeated cancels look different
+    x += random.randint(-30, 30)
+    y += random.randint(-20, 20)
+    return max(50, min(sw - 50, x)), max(40, min(sh - 160, y))
+
+
+def _slot_still_active(slot, sw, sh):
+    """Re-captures slot bar and checks if slot is still active/highlighted."""
+    cx, cy, w, h = slot
+    roi_y = int(sh * 0.78)
+    roi_b = int(sh * 0.98)
+    shot = ImageGrab.grab(bbox=(0, roi_y, sw, roi_b))
+    bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_RGB2BGR)
+    return is_active(bgr, cx, cy, w, h, roi_y)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SMART DEPLOYMENT ENGINE
+# ═══════════════════════════════════════════════════════════════════════════════
 def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, delay=T_DROP, randomize=True):
     """
     Select a slot and continuously drop troops at drop_points in a repeating sweep
     until the slot becomes inactive (card is empty).
-    
-    If randomize is True, adds spatial jitter, randomizes the sweep direction,
+
+    Red-Line Recovery:
+    If a drop click fails to place the troop (slot still active after expected
+    change on count-mode drops), the bot:
+      1. Clicks a safe random map corner to cancel the stuck selection
+      2. Re-selects the troop slot card
+      3. Retries the drop at a position shifted further outward from center
+
+    If randomize is True, also adds spatial jitter, randomizes the sweep direction,
     and randomizes the starting point to prevent robotic repetition.
-    
+
     Args:
         slot:            (cx, cy, w, h) of the slot card
         drop_points:     List of (x, y) positions to click on the map
@@ -421,22 +465,23 @@ def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, de
     cx, cy, w, h = slot
     roi_y = int(sh * 0.78)
     roi_b = int(sh * 0.98)
-    
+
     # Work on a copy of the drop points
     pts = list(drop_points)
-    
+
     if randomize:
         # 1. Randomly reverse the sweep direction
         if random.choice([True, False]):
             pts.reverse()
-            
+
         # 2. Randomly shift the starting point (rotate the list)
         shift = random.randint(0, len(pts) - 1)
         pts = pts[shift:] + pts[:shift]
-        
+
     n_pts = len(pts)
     total_clicks = 0
     ptr = 0   # pointer into pts
+    consecutive_stuck = 0  # track how many times in a row the slot didn't clear
 
     for batch in range(max_batches):
         # Re-check slot state before each batch
@@ -445,22 +490,67 @@ def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, de
         if not is_active(bgr, cx, cy, w, h, roi_y):
             break   # slot exhausted
 
-        for _ in range(drops_per_batch):
+        cleared_this_batch = False
+
+        for drop_idx in range(drops_per_batch):
             px, py = pts[ptr % n_pts]
-            
+
             if randomize:
-                # 3. Add small spatial jitter (±8 pixels) — small enough to stay
-                # safely outside the red zone, but enough to look human-like
+                # 3. Add small spatial jitter (±8 pixels)
                 px += random.randint(-8, 8)
                 py += random.randint(-8, 8)
                 # Clamp to screen
                 px = max(50, min(sw - 50, px))
                 py = max(50, min(sh - 150, py))
-                
+
             pyautogui.click(px, py)
             total_clicks += 1
             ptr += 1
-            
+
+            # ── Red-Line Recovery Check ────────────────────────────────────────
+            # After a drop click, quickly check if the slot STILL looks active.
+            # If the same slot is active after we clicked and we've tried at
+            # least one drop, we suspect the last click landed on a red zone.
+            time.sleep(0.06)  # brief pause for game to respond
+            if total_clicks >= 1 and _slot_still_active(slot, sw, sh):
+                # The drop likely failed (red-line hit).  Run recovery:
+                consecutive_stuck += 1
+                if consecutive_stuck >= 2:
+                    print(f"  ⚠️  [RED-LINE] Slot still active after drop — running recovery (stuck×{consecutive_stuck})")
+
+                    # Step 1: Click a safe spot to cancel the stuck selection
+                    cancel_x, cancel_y = _safe_cancel_spot(sw, sh)
+                    print(f"  ↩  [RED-LINE] Cancel-click at ({cancel_x},{cancel_y})")
+                    pyautogui.click(cancel_x, cancel_y)
+                    time.sleep(0.18)
+
+                    # Step 2: Re-select the troop slot
+                    pyautogui.moveTo(cx, cy, duration=0.15)
+                    pyautogui.click()
+                    time.sleep(T_SELECT_SHORT)
+
+                    # Step 3: Build a shifted-outward position from current drop point
+                    center_x, center_y = sw // 2, sh // 2
+                    dx, dy = px - center_x, py - center_y
+                    dist = math.hypot(dx, dy)
+                    if dist > 0:
+                        shift_amount = 35 + consecutive_stuck * 10   # grow shift with repeated failures
+                        px2 = int(px + (dx / dist) * shift_amount)
+                        py2 = int(py + (dy / dist) * shift_amount)
+                        px2 = max(50, min(sw - 50, px2))
+                        py2 = max(40, min(sh - 160, py2))
+                    else:
+                        # Fallback: choose a random perimeter point
+                        px2, py2 = random.choice(pts)
+
+                    print(f"  ↪  [RED-LINE] Recovery drop at ({px2},{py2})")
+                    pyautogui.click(px2, py2)
+                    time.sleep(0.12)
+                    cleared_this_batch = True
+            else:
+                consecutive_stuck = 0
+                cleared_this_batch = True
+
             # 4. Add small random delay jitter to look human
             click_delay = delay + random.uniform(-0.04, 0.04) if randomize else delay
             time.sleep(max(0.05, click_delay))
