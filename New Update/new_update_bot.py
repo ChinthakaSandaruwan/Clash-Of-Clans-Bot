@@ -439,7 +439,7 @@ def _slot_still_active(slot, sw, sh):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SMART DEPLOYMENT ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, delay=T_DROP, randomize=True):
+def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, delay=T_DROP, randomize=True, is_siege=False):
     """
     Select a slot and continuously drop troops at drop_points in a repeating sweep
     until the slot becomes inactive (card is empty).
@@ -447,9 +447,13 @@ def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, de
     Red-Line Recovery:
     If a drop click fails to place the troop (slot still active after expected
     change on count-mode drops), the bot:
-      1. Clicks a safe random map corner to cancel the stuck selection
-      2. Re-selects the troop slot card
-      3. Retries the drop at a position shifted further outward from center
+      1. Re-selects the slot card (arm troop, no drop)
+      2. Clicks a safe random map corner to reset the blocked red-line position
+      3. Re-selects the slot card again cleanly
+      4. Retries the drop at a position shifted further outward from center
+
+    NOTE: Red-line recovery is DISABLED for siege machines (is_siege=True) because
+    clicking the siege machine slot card a second time detonates it prematurely.
 
     If randomize is True, also adds spatial jitter, randomizes the sweep direction,
     and randomizes the starting point to prevent robotic repetition.
@@ -461,6 +465,7 @@ def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, de
         drops_per_batch: How many drop points to use per sweep pass
         delay:           Time between individual drop clicks
         randomize:       Whether to add human-like random variance to drops
+        is_siege:        Set True for siege machines — disables slot re-click recovery
     """
     cx, cy, w, h = slot
     roi_y = int(sh * 0.78)
@@ -508,44 +513,67 @@ def deploy_slot(slot, drop_points, sw, sh, max_batches=12, drops_per_batch=5, de
             ptr += 1
 
             # ── Red-Line Recovery Check ────────────────────────────────────────
-            # After a drop click, quickly check if the slot STILL looks active.
-            # If the same slot is active after we clicked and we've tried at
-            # least one drop, we suspect the last click landed on a red zone.
-            time.sleep(0.06)  # brief pause for game to respond
+            # After a drop click, briefly pause then check if the slot is STILL
+            # highlighted/active.  If so, the click likely landed on a red-zone
+            # base object and the troop was NOT placed.  Run a 4-step recovery:
+            #
+            #   1. Re-select the slot card  (arm the troop again cleanly)
+            #   2. Click a random safe map corner  (resets / skips the blocked
+            #      red-line position without getting permanently stuck)
+            #   3. Re-select the slot card once more  (reload for a clean drop)
+            #   4. Drop at a position shifted outwards from the problematic point
+            #
+            # ⚠️ SIEGE MACHINE EXCEPTION: Recovery is fully skipped for siege
+            #    machines (is_siege=True).  Clicking a siege machine slot a second
+            #    time after deployment detonates it immediately — never do that.
+            #
+            time.sleep(0.08)  # brief pause for game to respond
             if total_clicks >= 1 and _slot_still_active(slot, sw, sh):
-                # The drop likely failed (red-line hit).  Run recovery:
-                consecutive_stuck += 1
-                if consecutive_stuck >= 2:
-                    print(f"  ⚠️  [RED-LINE] Slot still active after drop — running recovery (stuck×{consecutive_stuck})")
+                if is_siege:
+                    # Siege machine — never re-click the slot card.  Just wait
+                    # and let the game handle it; clicking again destroys it.
+                    print("  ℹ️  [SIEGE] Slot still active — skipping recovery to protect siege machine.")
+                    consecutive_stuck += 1
+                    cleared_this_batch = True
+                else:
+                    # ── Normal troop: run 4-step red-line recovery ─────────────
+                    consecutive_stuck += 1
+                    print(f"  ⚠️  [RED-LINE] Slot still highlighted after drop — recovery #{consecutive_stuck}")
 
-                    # Step 1: Click a safe spot to cancel the stuck selection
+                    # Step 1: Re-select the troop icon (arm troop, no drop yet)
+                    pyautogui.moveTo(cx, cy, duration=0.12)
+                    pyautogui.click()
+                    time.sleep(0.15)
+
+                    # Step 2: Click a safe random map location to reset the
+                    #         blocked red-line position before the real drop.
                     cancel_x, cancel_y = _safe_cancel_spot(sw, sh)
-                    print(f"  ↩  [RED-LINE] Cancel-click at ({cancel_x},{cancel_y})")
+                    print(f"  ↩  [RED-LINE] Safe-reset click at ({cancel_x},{cancel_y})")
                     pyautogui.click(cancel_x, cancel_y)
-                    time.sleep(0.18)
+                    time.sleep(0.22)
 
-                    # Step 2: Re-select the troop slot
-                    pyautogui.moveTo(cx, cy, duration=0.15)
+                    # Step 3: Re-select the troop icon again for a clean drop
+                    pyautogui.moveTo(cx, cy, duration=0.12)
                     pyautogui.click()
                     time.sleep(T_SELECT_SHORT)
 
-                    # Step 3: Build a shifted-outward position from current drop point
+                    # Step 4: Compute a shifted-outward position and deploy
                     center_x, center_y = sw // 2, sh // 2
                     dx, dy = px - center_x, py - center_y
                     dist = math.hypot(dx, dy)
                     if dist > 0:
-                        shift_amount = 35 + consecutive_stuck * 10   # grow shift with repeated failures
+                        shift_amount = 35 + consecutive_stuck * 12  # grows with each failure
                         px2 = int(px + (dx / dist) * shift_amount)
                         py2 = int(py + (dy / dist) * shift_amount)
                         px2 = max(50, min(sw - 50, px2))
                         py2 = max(40, min(sh - 160, py2))
                     else:
-                        # Fallback: choose a random perimeter point
+                        # Fallback: pick a different random perimeter point
                         px2, py2 = random.choice(pts)
 
                     print(f"  ↪  [RED-LINE] Recovery drop at ({px2},{py2})")
                     pyautogui.click(px2, py2)
-                    time.sleep(0.12)
+                    time.sleep(0.15)
                     cleared_this_batch = True
             else:
                 consecutive_stuck = 0
@@ -689,7 +717,8 @@ def execute_attack(sw, sh, army_config=None):
 
         # ── Determine click count from army_config or defaults ─────────────
         if i == 3:
-            # Siege Machine always exactly 1 drop
+            # Siege Machine: exactly 1 drop, and NEVER re-click slot (is_siege=True)
+            # Re-clicking the siege slot after launch detonates it immediately.
             max_b, drops_pb = 1, 1
         elif troop_counts and i < len(troop_counts):
             count = troop_counts[i]
@@ -703,7 +732,8 @@ def execute_attack(sw, sh, army_config=None):
             slot, sweep_pts, sw, sh,
             max_batches=max_b,
             drops_per_batch=drops_pb,
-            delay=T_DROP
+            delay=T_DROP,
+            is_siege=(i == 3)   # protect Stone Slammer from accidental re-click
         )
         print(f"  [T{i+1}] Done  ({total} drops)")
 
