@@ -17,6 +17,7 @@ NORMAL_BOT_SCRIPTS = [
     "Normal Battle/bot4.py",  "Normal Battle/bot5.py",  "Normal Battle/bot6.py",
     "Normal Battle/bot7.py",  "Normal Battle/bot8.py",  "Normal Battle/bot9.py",
     "Normal Battle/bot10.py", "Normal Battle/bot11.py", "Normal Battle/bot12.py",
+    "Normal Battle/bot13.py", 
 ]
 
 RANK_BOT_SCRIPTS = [

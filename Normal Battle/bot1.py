@@ -105,29 +105,24 @@ while current_step < len(image_sequence):
                 pyautogui.click(674, 203)
                 time.sleep(0.20)
 
-                #Balloons
-                #Balloon Select
+                #Dragon
+                #Dragon Select
                 pyautogui.click(354, 1113)
                 time.sleep(1.34)
-                #1Balloon Drop
-                pyautogui.click(259, 609)
-                time.sleep(0.30)
-                #2Balloon Drop
-                pyautogui.click(359, 671)
-                time.sleep(0.25)
-                #3Balloon Drop
-                pyautogui.click(420, 723)
-                time.sleep(0.25)
+                #1Dragon Drop
+                pyautogui.click(674, 203)
+                time.sleep(0.20)
+             
 
-                #Archers
-                #Archer Select
+                #Minions
+                #Minion Select
                 pyautogui.click(549, 1097)
                 time.sleep(0.55)
-                #1Archer Drop
+                #1Minion Drop
                 pyautogui.click(214, 549)
                 time.sleep(0.30)
 
-                #Vehicles
+                #Stone Slammer
                 #Stone Slammer Select
                 pyautogui.click(681, 1087)
                 time.sleep(0.63)

@@ -177,6 +177,29 @@ while current_step < len(image_sequence):
 
     time.sleep(0.5)   # poll interval
 
+# Check for Star Bonus Received popup (only comes up when star bonus is complete after Return Home)
+print("\n[INFO] Checking for Star Bonus Received window...")
+star_bonus_image = '(0)Star Bonus Received.png'
+star_bonus_path = os.path.join(images_dir, star_bonus_image)
+
+start_time = time.time()
+found_star_bonus = False
+while time.time() - start_time < 10:
+    result = find_on_screen(star_bonus_path, threshold=0.72)
+    if result is not None:
+        cx, cy, confidence = result
+        print(f"[FOUND] Star Bonus Received window found! confidence={confidence:.3f}")
+        pyautogui.moveTo(cx, cy, duration=0.2)
+        pyautogui.click()
+        print(f"[CLICK] Clicked OK button at: ({cx}, {cy})")
+        found_star_bonus = True
+        time.sleep(2)
+        break
+    time.sleep(0.5)
+
+if not found_star_bonus:
+    print("[INFO] No Star Bonus window detected within timeout.")
+
 # ─── Done ─────────────────────────────────────────────────────────────────────
 print("\n" + "=" * 54)
 print("  [SUCCESS] Rank Battle attack completed!")

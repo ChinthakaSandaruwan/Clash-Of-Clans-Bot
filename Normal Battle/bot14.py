@@ -52,118 +52,150 @@ while current_step < len(image_sequence):
                 time.sleep(10)
                 
                 # Electro Dragon Select
-                pyautogui.click(263, 1119)
-                time.sleep(4.14)
-                # 4Electro Dragon Drop
-                pyautogui.click(397, 706)
-                time.sleep(0.25)
-                # 5Electro Dragon Drop
-                pyautogui.click(321, 639)
-                time.sleep(0.20)
-                # 6Electro Dragon Drop
-                pyautogui.click(220, 567)
-                time.sleep(0.20)
-                # 7Electro Dragon Drop
-                pyautogui.click(310, 472)
-                time.sleep(0.25)
-                # 8Electro Dragon Drop
-                pyautogui.click(418, 387)
-                time.sleep(0.30)
-                # 9Electro Dragon Drop
-                pyautogui.click(508, 315)
-                time.sleep(0.20)
-                # 10Electro Dragon Drop
-                pyautogui.click(585, 261)
-                time.sleep(0.20)
-                # 11Electro Dragon Drop
-                pyautogui.click(674, 203)
-                time.sleep(0.20)
+                pyautogui.click(255, 1096)
+                time.sleep(3.59)
                 # 1Electro Dragon Drop
-                pyautogui.click(639, 902)
-                time.sleep(0.30)
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
                 # 2Electro Dragon Drop
-                pyautogui.click(552, 841)
-                time.sleep(0.25)
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
                 # 3Electro Dragon Drop
-                pyautogui.click(478, 760)
-                time.sleep(0.25)
-
-                #Dragon
-                #Dragon Select
-                pyautogui.click(354, 1113)
-                time.sleep(1.34)
-                #1Dragon Drop
-                pyautogui.click(674, 203)
-                time.sleep(0.20)
-             
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 4Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 5Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 6Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 7Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 8Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 9Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 10Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                # 11Electro Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
 
                 #Minions
                 #Minion Select
                 pyautogui.click(549, 1097)
                 time.sleep(0.55)
                 #1Minion Drop
-                pyautogui.click(214, 549)
-                time.sleep(0.30)
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
 
-                # Vehicles
-                pyautogui.click(681, 1087)
-                time.sleep(0.63)
-                pyautogui.click(211, 542)
-                time.sleep(0.30)
 
-                # Barbarian King
-                pyautogui.click(848, 1097)
-                time.sleep(0.82)
-                pyautogui.click(206, 544)
-                time.sleep(1.32)
 
-                # Grand Warden
-                pyautogui.click(1099, 1063)
-                time.sleep(0.84)
-                pyautogui.click(442, 730)
-                time.sleep(1.14)
+                #Dragon
+                #Dragon Select
+                pyautogui.click(354, 1113)
+                time.sleep(1.34)
+                #1Dragon Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+             
 
-                # Royal Champion
-                pyautogui.click(1239, 1095)
-                time.sleep(0.85)
-                pyautogui.click(205, 552)
-                time.sleep(0.98)
+             
+            
 
-                # Archer Queen
-                pyautogui.click(951, 1076)
-                time.sleep(0.84)
-                pyautogui.click(459, 341)
+           
+                
+                
+                
+                #royal Champion
+                pyautogui.click(816, 1091)
+                time.sleep(1.33)
+                #1Royal Champion Drop
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                
+                
+                
+                #Barbarian King
+                pyautogui.click(955, 1080)
+                time.sleep(0.89)
+
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                
+                #Archer Queen
+                pyautogui.click(1108, 1067)
+                time.sleep(0.9)
+
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                
+                
+                #Grand Warden
+                pyautogui.click(1229, 1053)
                 time.sleep(0.99)
 
-                # Rage Spells
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+                
+                
+                
+                
+               # Rage Spells
                 pyautogui.click(1371, 1121)
                 time.sleep(0.82)
+
+                pyautogui.click(899, 545)
+                time.sleep(0.30)
+                pyautogui.click(906, 448)
+                time.sleep(0.25)
                 pyautogui.click(880, 689)
                 time.sleep(1.18)
                 pyautogui.click(776, 594)
                 time.sleep(0.25)
                 pyautogui.click(772, 492)
                 time.sleep(0.25)
-                pyautogui.click(906, 448)
-                time.sleep(0.25)
-                pyautogui.click(899, 545)
-                time.sleep(0.30)
+             
+             
+
+
 
                 # Freeze Spell
                 pyautogui.click(1538, 1111)
                 time.sleep(1.11)
                 pyautogui.click(980, 555)
                 time.sleep(1.53)
+                
+                
+                #Hero Abilities
+                pyautogui.click(1183, 1088)
+                time.sleep(0.82)
 
-                # Hero Abilities
-                pyautogui.click(835, 1105)
-                time.sleep(1.26)
-                pyautogui.click(953, 1093)
-                time.sleep(0.83)
-                pyautogui.click(1111, 1098)
-                time.sleep(0.50)
-                pyautogui.click(1208, 1101)
-                time.sleep(0.55)
+                pyautogui.click(822, 1058)
+                time.sleep(0.62)
+
+                pyautogui.click(941, 1069)
+                time.sleep(0.44)
+
+                pyautogui.click(1102, 1079)
+                time.sleep(0.46)
+
+
+                #vehicles
+                pyautogui.click(704, 1080)
+                time.sleep(1.19)
+
+                pyautogui.click(158, 565)
+                time.sleep(0.16)
+
+
                 
                 print("[SUCCESS] Attack macro completed!\n")
             
