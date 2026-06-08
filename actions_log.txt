@@ -1,79 +1,64 @@
 
---- New Session (2026-06-05 23:29:33) ---
+--- New Session (2026-06-08 11:58:10) ---
 pyautogui.scroll(-1000)
-time.sleep(6.46)
+time.sleep(3.3)
 
 pyautogui.scroll(-1000)
 time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.27)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.47)
 
 pyautogui.scroll(-1000)
 time.sleep(0.03)
 
 pyautogui.scroll(-1000)
-time.sleep(0.02)
+time.sleep(0.03)
 
 pyautogui.scroll(-1000)
-time.sleep(0.04)
-
-pyautogui.click(733, 686)
-time.sleep(0.65)
-
-pyautogui.click(134, 1077)
-time.sleep(0.86)
-
-pyautogui.click(299, 878)
-time.sleep(1.24)
-
-pyautogui.click(1514, 978)
-time.sleep(1.04)
+time.sleep(0.62)
 
 pyautogui.scroll(-1000)
-time.sleep(10.23)
+time.sleep(0.03)
+
+pyautogui.click(310, 408)
+time.sleep(1.65)
 
 pyautogui.scroll(-1000)
-time.sleep(0.02)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.02)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.33)
-
-pyautogui.scroll(-1000)
-time.sleep(0.02)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.26)
-
-pyautogui.scroll(-1000)
-time.sleep(0.02)
+time.sleep(0.4)
 
 pyautogui.scroll(-1000)
 time.sleep(0.02)
@@ -88,131 +73,166 @@ pyautogui.scroll(-1000)
 time.sleep(0.01)
 
 pyautogui.scroll(-1000)
-time.sleep(0.29)
-
-pyautogui.scroll(-1000)
-time.sleep(0.02)
-
-pyautogui.scroll(-1000)
 time.sleep(0.01)
 
 pyautogui.scroll(-1000)
-time.sleep(0.02)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.click(158, 565)
-time.sleep(4.97)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.16)
-
-pyautogui.click(158, 565)
-time.sleep(0.15)
-
-pyautogui.click(158, 565)
-time.sleep(0.15)
-
-pyautogui.click(158, 565)
-time.sleep(0.13)
-
-pyautogui.click(158, 565)
-time.sleep(0.28)
-
-pyautogui.click(158, 565)
-time.sleep(0.15)
-
-pyautogui.click(158, 565)
-time.sleep(0.14)
-
-pyautogui.click(158, 565)
-time.sleep(0.16)
-
-pyautogui.scroll(-1000)
-time.sleep(0.2)
-
-pyautogui.scroll(-1000)
-time.sleep(0.02)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.scroll(-1000)
-time.sleep(0.01)
-
-pyautogui.click(158, 565)
-time.sleep(0.41)
-
-pyautogui.click(158, 565)
-time.sleep(0.19)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.16)
-
-pyautogui.click(158, 565)
-time.sleep(0.17)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.16)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.18)
-
-pyautogui.click(158, 565)
-time.sleep(0.21)
-
-pyautogui.click(158, 565)
-time.sleep(0.16)
-
-pyautogui.click(158, 565)
-time.sleep(0.21)
-
-pyautogui.click(158, 565)
-time.sleep(0.21)
-
-pyautogui.click(158, 565)
 time.sleep(0.22)
 
-pyautogui.click(158, 565)
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.34)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.click(671, 422)
+time.sleep(3.94)
+
+pyautogui.click(796, 314)
+time.sleep(1.02)
+
+pyautogui.click(941, 268)
+time.sleep(1.01)
+
+pyautogui.click(1063, 330)
+time.sleep(0.87)
+
+pyautogui.click(1139, 405)
+time.sleep(1.07)
+
+
+--- New Session (2026-06-08 12:00:41) ---
+pyautogui.click(1708, 989)
+time.sleep(1.16)
+
+pyautogui.scroll(-1000)
+time.sleep(4.08)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.24)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.scroll(-1000)
+time.sleep(0.01)
+
+pyautogui.scroll(-1000)
+time.sleep(0.02)
+
+pyautogui.click(811, 65)
+time.sleep(1.65)
+
+pyautogui.click(811, 65)
 time.sleep(0.2)
 
-pyautogui.click(158, 565)
+pyautogui.click(811, 65)
+time.sleep(0.17)
+
+pyautogui.click(811, 65)
 time.sleep(0.16)
+
+pyautogui.click(811, 65)
+time.sleep(0.16)
+
+pyautogui.click(811, 65)
+time.sleep(0.16)
+
+pyautogui.click(811, 65)
+time.sleep(0.16)
+
+pyautogui.click(807, 78)
+time.sleep(0.59)
+
+pyautogui.click(822, 66)
+time.sleep(0.5)
+
+pyautogui.click(809, 66)
+time.sleep(0.53)
+
+pyautogui.click(809, 66)
+time.sleep(0.22)
+
+pyautogui.click(809, 66)
+time.sleep(0.19)
+
+pyautogui.click(809, 66)
+time.sleep(0.18)
+
+pyautogui.click(809, 66)
+time.sleep(0.18)
+
+pyautogui.click(809, 66)
+time.sleep(0.19)
+
+pyautogui.click(809, 66)
+time.sleep(0.14)
+
+pyautogui.click(809, 66)
+time.sleep(2.08)
+
+pyautogui.click(809, 66)
+time.sleep(0.32)
+
+pyautogui.click(809, 66)
+time.sleep(0.27)
+
+pyautogui.click(809, 66)
+time.sleep(0.22)
+
+pyautogui.click(809, 66)
+time.sleep(0.17)
 

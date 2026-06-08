@@ -17,10 +17,14 @@ NORMAL_BOT_SCRIPTS = [
     "Normal Battle/bot4.py",  "Normal Battle/bot5.py",  "Normal Battle/bot6.py",
     "Normal Battle/bot7.py",  "Normal Battle/bot8.py",  "Normal Battle/bot9.py",
     "Normal Battle/bot10.py", "Normal Battle/bot11.py", "Normal Battle/bot12.py",
-    "Normal Battle/bot13.py", 
+    "Normal Battle/bot13.py", "Normal Battle/bot14.py",
+    # --- Different attack styles (bot15–bot20) ---
+    "Normal Battle/bot15.py", "Normal Battle/bot16.py", "Normal Battle/bot17.py",
+    "Normal Battle/bot18.py", "Normal Battle/bot19.py", "Normal Battle/bot20.py",
 ]
 
 RANK_BOT_SCRIPTS = [
+    
     "Rank Battle/rankBot1.py",  "Rank Battle/rankBot2.py",  "Rank Battle/rankBot3.py",
     "Rank Battle/rankBot4.py",  "Rank Battle/rankBot5.py",  "Rank Battle/rankBot6.py",
     "Rank Battle/rankBot7.py",  "Rank Battle/rankBot8.py",  "Rank Battle/rankBot9.py",
@@ -129,7 +133,7 @@ class BotRunnerGUI:
         self.log_area.insert(
             tk.END,
             "System ready.\n"
-            "  • Normal Battle Respectively  – runs bot1 → bot12 in order, loops forever\n"
+            "  • Normal Battle Respectively  – runs bot1 → bot20 in order, loops forever\n"
             "  • Random Normal Battle         – picks a random Normal bot each turn\n"
             "  • Rank Battle Respectively     – runs rankBot1 → rankBot12 in order, loops forever\n"
             "  • Random Rank Battle           – picks a random Rank bot each turn\n\n"
